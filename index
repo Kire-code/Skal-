@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skál: beer reviews</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root {
+  --bg: #EDF2EF; --surface: #FFFFFF; --ink: #1C2621; --muted: #5C6962;
+  --line: #D3DDD7; --amber: #D48A0A; --amber-soft: #F5E3BC; --foam: #FFF8E7;
+  --danger: #B3261E;
+  --font: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111714; --surface: #1A221E; --ink: #E8EEEA; --muted: #9AA7A0;
+    --line: #2B3630; --amber: #F0A92A; --amber-soft: #3A2E14; --foam: #F3E6C8;
+    --danger: #FF8A80;
+  }
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; }
+body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.muted { color: var(--muted); }
+
+.mark { font-weight: 800; font-size: clamp(56px, 13vw, 104px); line-height: .85; letter-spacing: -.045em; margin: 0; font-variation-settings: "opsz" 96; }
+
+.primary { background: var(--ink); color: var(--bg); border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 600; cursor: pointer; }
+.primary:disabled { opacity: .6; cursor: progress; }
+.ghost { background: transparent; border: 1.5px solid var(--line); border-radius: 999px; padding: 10px 18px; font-weight: 600; cursor: pointer; }
+.small { padding: 6px 14px; font-size: 14px; }
+.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+.link { background: none; border: 0; padding: 4px 0; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 14px; }
+label .opt { font-weight: 400; color: var(--muted); }
+input:not([type=file]), select, textarea {
+  display: block; width: 100%; margin-top: 6px; padding: 11px 13px;
+  background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; font-weight: 400; font-size: 16px;
+}
+textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.msg { min-height: 1.5em; color: var(--muted); font-size: 14px; margin: 10px 0 0; }
+.msg.err { color: var(--danger); }
+
+.center { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+.panel { width: min(420px, 100%); }
+.panel .mark { margin-bottom: 14px; }
+.lede { font-size: 19px; color: var(--muted); margin: 0 0 28px; }
+.panel .primary { width: 100%; margin-top: 6px; }
+.panel .link { margin-top: 18px; }
+
+#app { max-width: 1120px; margin: 0 auto; padding: 28px 20px 120px; }
+.top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.me { text-align: right; color: var(--muted); font-size: 14px; }
+.me strong { color: var(--ink); display: block; font-size: 16px; }
+.summary { font-size: clamp(19px, 3vw, 24px); line-height: 1.3; max-width: 32ch; margin: 18px 0 26px; }
+.summary b { color: var(--amber); font-weight: 800; }
+.controls { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; margin-bottom: 22px; }
+.controls input, .controls select { margin: 0; background: var(--surface); }
+.controls select { width: auto; }
+.seg { display: flex; background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: none; padding: 7px 14px; border-radius: 999px; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed=true] { background: var(--ink); color: var(--bg); }
+@media (max-width: 640px) {
+  .controls { grid-template-columns: 1fr 1fr; }
+  .controls input { grid-column: 1 / -1; }
+  .controls select { width: 100%; }
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; text-align: left; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; cursor: pointer; }
+.card:hover { border-color: var(--amber); }
+.ph { aspect-ratio: 4 / 3; background: var(--amber-soft); }
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.initial { height: 100%; display: grid; place-items: center; font-size: 88px; font-weight: 800; color: var(--amber); letter-spacing: -.04em; }
+.cb { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.card h3 { margin: 0; font-size: 20px; line-height: 1.15; font-weight: 800; letter-spacing: -.01em; }
+.brew { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.meter { display: flex; align-items: flex-end; gap: 5px; flex: none; font-weight: 800; font-size: 18px; line-height: 1; }
+.meter small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.glass { width: 24px; height: 40px; display: block; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.tags span { background: var(--bg); border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 600; }
+.snip { margin: 0; color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.by { margin: auto 0 0; font-size: 13px; color: var(--muted); padding-top: 4px; }
+.by b { color: var(--ink); font-weight: 600; }
+
+.empty { grid-column: 1 / -1; padding: 48px 0; }
+.empty p { font-size: 20px; margin: 0 0 16px; }
+
+.fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--amber); color: #1C1405; border: 0; border-radius: 999px; padding: 16px 24px; font-weight: 800; font-size: 17px; cursor: pointer; box-shadow: 0 6px 20px rgb(120 70 0 / .3); }
+
+dialog { border: 0; padding: 0; border-radius: 20px; width: min(580px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); background: var(--surface); color: var(--ink); overflow: auto; }
+dialog::backdrop { background: rgb(0 0 0 / .5); }
+.dlg { padding: 22px 22px 24px; }
+.dlg h2 { margin: 0 0 18px; font-size: 28px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
+@media (max-width: 600px) {
+  dialog { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 20px 20px 0 0; max-height: 92dvh; }
+  .dlg { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+}
+
+.rating { display: flex; align-items: flex-end; gap: 4px; margin: 8px 0 18px; flex-wrap: wrap; }
+.rbtn { background: none; border: 0; padding: 4px; cursor: pointer; border-radius: 8px; }
+.rbtn .glass { width: 30px; height: 50px; }
+.rlabel { margin-left: 8px; padding-bottom: 8px; font-weight: 600; color: var(--muted); }
+
+.photo-pick { display: flex; gap: 14px; align-items: center; margin: 6px 0 18px; }
+.photo-pick img { width: 84px; height: 84px; object-fit: cover; border-radius: 12px; }
+.file-btn { position: relative; overflow: hidden; display: inline-block; margin: 0; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.d-photo { width: 100%; max-height: 50dvh; object-fit: cover; display: block; }
+.d-title { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -.02em; line-height: 1.05; }
+.d-score { display: flex; align-items: flex-end; gap: 12px; margin: 18px 0; }
+.d-score .glass { width: 36px; height: 60px; }
+.d-score strong { font-size: 30px; line-height: 1; }
+.d-score span { color: var(--muted); display: block; font-size: 15px; }
+.d-also { margin: 0 0 8px; }
+.rev { border-top: 1px solid var(--line); padding: 14px 0; }
+.rev-head { display: flex; gap: 10px; align-items: flex-start; }
+.rev-head .glass { width: 22px; height: 36px; flex: none; }
+.rev-meta { color: var(--muted); font-size: 14px; }
+.rev-text { white-space: pre-wrap; margin: 8px 0 0; font-size: 16px; line-height: 1.55; }
+.rev-photo { display: block; width: 100%; max-height: 280px; object-fit: cover; border-radius: 12px; margin-top: 10px; }
+.rev-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+#toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 12px; font-weight: 600; font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px); z-index: 10; }
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#toast.err { background: var(--danger); color: #fff; }
+@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+</style>
+</head>
+<body>
+
+<section id="auth" class="center" hidden>
+  <div class="panel">
+    <h1 class="mark">Skál</h1>
+    <p class="lede">Beers we've tried, rated by the crew.</p>
+    <form id="authForm" novalidate>
+      <label id="nameRow" hidden>Your name <span class="opt">(shown on your reviews)</span>
+        <input name="name" autocomplete="nickname" maxlength="40">
+      </label>
+      <label>Email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Password<input name="password" type="password" minlength="6" autocomplete="current-password" required></label>
+      <button class="primary" id="authBtn" type="submit">Sign in</button>
+      <p id="authMsg" class="msg" role="status"></p>
+    </form>
+    <button class="link" id="authToggle" type="button">New here? Create an account</button>
+  </div>
+</section>
+
+<main id="app" hidden>
+  <header class="top">
+    <h1 class="mark">Skál</h1>
+    <div class="me"><strong id="who"></strong><button class="link" id="signOut" type="button">Sign out</button></div>
+  </header>
+  <p id="summary" class="summary"></p>
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search beers, breweries, styles, people" aria-label="Search beers">
+    <div class="seg" role="group" aria-label="Whose beers">
+      <button type="button" data-f="all" aria-pressed="true">Everyone</button>
+      <button type="button" data-f="mine" aria-pressed="false">Mine</button>
+    </div>
+    <select id="sort" aria-label="Sort beers">
+      <option value="new">Latest reviewed</option>
+      <option value="top">Highest rated</option>
+      <option value="name">A to Z</option>
+    </select>
+  </div>
+  <div id="grid" class="grid"></div>
+  <button id="addBtn" class="fab" type="button">Add a beer</button>
+</main>
+
+<dialog id="formDlg" aria-labelledby="formTitle">
+  <form id="form" class="dlg" novalidate>
+    <h2 id="formTitle">Add a beer</h2>
+    <label>Beer name<input name="beer_name" maxlength="120" list="beerList" autocomplete="off" required></label>
+    <div class="row2">
+      <label>Brewery <span class="opt">(optional)</span><input name="brewery" maxlength="120" list="breweryList" autocomplete="off"></label>
+      <label>Style <span class="opt">(optional)</span><input name="beer_style" maxlength="60" list="styleList" autocomplete="off"></label>
+    </div>
+    <div class="row2">
+      <label>ABV % <span class="opt">(optional)</span><input name="abv" inputmode="decimal" placeholder="5.2" maxlength="5" autocomplete="off"></label>
+      <label>When<input name="drunk_on" type="date"></label>
+    </div>
+    <label>Where <span class="opt">(optional)</span><input name="location" maxlength="120" placeholder="Bar, city, or at home" autocomplete="off"></label>
+    <div>
+      <span style="font-weight:600;font-size:14px">Rating</span>
+      <div id="rating" class="rating" role="group" aria-label="Rating out of 5"></div>
+    </div>
+    <label>Review <span class="opt">(optional)</span><textarea name="review" maxlength="4000" placeholder="How did it taste? Would you have it again?"></textarea></label>
+    <span style="font-weight:600;font-size:14px">Photo <span class="opt">(optional)</span></span>
+    <div class="photo-pick">
+      <img id="preview" alt="Selected photo" hidden>
+      <span class="ghost file-btn" id="pickLabel">Choose photo<input id="photo" type="file" accept="image/*" aria-label="Choose photo"></span>
+      <button type="button" class="link" id="removePhoto" hidden>Remove photo</button>
+    </div>
+    <div class="actions">
+      <button type="button" class="ghost" id="cancelBtn">Cancel</button>
+      <button type="submit" class="primary" id="saveBtn">Save review</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="detailDlg"><div id="detail"></div></dialog>
+
+<datalist id="beerList"></datalist>
+<datalist id="styleList"></datalist>
+<datalist id="breweryList"></datalist>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const SUPABASE_URL = 'https://xeqxwpprpcfjluudtsgo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlcXh3cHBycGNmamx1dWR0c2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzIyMjEsImV4cCI6MjEwNjI0ODIyMX0.7eSJ0xfBQOqwqECAYK5pON9EkQ-YJE64BlHMwzxaplQ';
+
+const BUCKET = 'beer-photos';
+const LABELS = ['', 'Drain pour', 'Meh', 'Decent', 'Really good', 'Outstanding'];
+const BASE_STYLES = ['Lager', 'Pilsner', 'Helles', 'Pale Ale', 'IPA', 'NEIPA', 'Double IPA', 'Session IPA', 'Amber Ale', 'Red Ale', 'Brown Ale', 'Porter', 'Stout', 'Imperial Stout', 'Wheat beer', 'Hefeweizen', 'Witbier', 'Saison', 'Sour', 'Gose', 'Fruit beer', 'Belgian Dubbel', 'Belgian Tripel', 'Bock', 'Doppelbock', 'Kölsch', 'Märzen', 'Barleywine', 'Jólabjór', 'Páskabjór', 'Þorrabjór'];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const keyOf = name => String(name || '').trim().toLowerCase();
+
+let sb = null;
+const state = { user: null, reviews: [], beers: [], filter: 'all', sort: 'new', q: '', editing: null, rating: 0, photoFile: null, removePhoto: false, authMode: 'in', openKey: null };
+
+function show(view) { for (const id of ['auth', 'app']) $('#' + id).hidden = id !== view; }
+
+let toastTimer;
+function toast(text, isErr = false) {
+  const t = $('#toast');
+  t.textContent = text;
+  t.className = 'show' + (isErr ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, isErr ? 5000 : 2500);
+}
+
+function todayISO() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso.length === 10 ? iso + 'T12:00:00' : iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function fmtAbv(n) { return Number(n).toLocaleString('is-IS', { maximumFractionDigits: 1 }) + '%'; }
+function fmtAvg(n) { return n.toLocaleString('en-GB', { maximumFractionDigits: 1 }); }
+function photoUrl(path) { return path ? sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl : ''; }
+function isMine(r) { return r.user_id === state.user?.id; }
+function whoName(r) { return isMine(r) ? 'You' : (r.profiles?.display_name || 'Someone'); }
+function myReview(b) { return b.reviews.find(isMine); }
+function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
+// A pint glass filled to level/5 (fractions allowed)
+let glassId = 0;
+function glassSvg(level) {
+  const id = 'gc' + (++glassId);
+  const top = 4, bottom = 57;
+  const y = bottom - (bottom - top) * (level / 5);
+  const shape = 'M4 3h28l-3.5 54h-21z';
+  return `<svg class="glass" viewBox="0 0 36 60" aria-hidden="true">
+    <defs><clipPath id="${id}"><path d="${shape}"/></clipPath></defs>
+    <g clip-path="url(#${id})">
+      <rect x="0" y="${y}" width="36" height="60" style="fill:var(--amber)"/>
+      ${level > 0 ? `<rect x="0" y="${y - 4}" width="36" height="5" style="fill:var(--foam)"/>` : ''}
+    </g>
+    <path d="${shape}" style="fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round"/>
+  </svg>`;
+}
+
+// ─── Auth ───
+function setAuthMode(mode) {
+  state.authMode = mode;
+  const up = mode === 'up';
+  $('#nameRow').hidden = !up;
+  $('#authBtn').textContent = up ? 'Create account' : 'Sign in';
+  $('#authToggle').textContent = up ? 'Already have an account? Sign in' : 'New here? Create an account';
+  $('#authForm').elements.password.autocomplete = up ? 'new-password' : 'current-password';
+  authMsg('');
+}
+function authMsg(text, isErr = false) { const m = $('#authMsg'); m.textContent = text; m.className = 'msg' + (isErr ? ' err' : ''); }
+
+async function authSubmit(e) {
+  e.preventDefault();
+  const f = $('#authForm');
+  const email = f.elements.email.value.trim();
+  const password = f.elements.password.value;
+  const name = f.elements.name.value.trim();
+  if (!email || !email.includes('@')) return authMsg('Enter your email address.', true);
+  if (password.length < 6) return authMsg('Password needs at least 6 characters.', true);
+  if (state.authMode === 'up' && !name) return authMsg('Add your name so friends know who wrote the review.', true);
+
+  const btn = $('#authBtn');
+  btn.disabled = true;
+  try {
+    if (state.authMode === 'up') {
+      const { data, error } = await sb.auth.signUp({
+        email, password,
+        options: { data: { display_name: name }, emailRedirectTo: location.href.split('#')[0].split('?')[0] }
+      });
+      if (error) throw error;
+      if (!data.session) {
+        setAuthMode('in');
+        authMsg('Check your inbox and tap the confirmation link, then sign in here.');
+      }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Email or password is wrong.' : error.message);
+    }
+  } catch (err) {
+    authMsg(err.message || String(err), true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function onSession(session) {
+  state.user = session?.user || null;
+  if (!state.user) { show('auth'); return; }
+  show('app');
+  $('#who').textContent = state.user.user_metadata?.display_name || state.user.email;
+  await loadReviews();
+}
+
+// ─── Data ───
+async function loadReviews() {
+  const { data, error } = await sb.from('reviews')
+    .select('*, profiles(display_name)')
+    .order('created_at', { ascending: false });
+  if (error) { toast('Couldn\'t load reviews: ' + error.message, true); return; }
+  state.reviews = data || [];
+  buildBeers();
+  fillDatalists();
+  render();
+}
+
+// Group reviews into one entry per beer (matched by name, ignoring case)
+function buildBeers() {
+  const map = new Map();
+  for (const r of state.reviews) {
+    const k = keyOf(r.beer_name);
+    let b = map.get(k);
+    if (!b) {
+      b = { key: k, name: r.beer_name.trim(), brewery: null, style: null, abv: null, photo: null, latest: r.created_at, reviews: [] };
+      map.set(k, b);
+    }
+    b.reviews.push(r);
+    if (!b.brewery && r.brewery) b.brewery = r.brewery;
+    if (!b.style && r.style) b.style = r.style;
+    if (b.abv == null && r.abv != null) b.abv = r.abv;
+    if (!b.photo && r.photo_path) b.photo = r.photo_path;
+  }
+  state.beers = [...map.values()].map(b => ({ ...b, avg: b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length }));
+}
+
+function fillDatalists() {
+  const uniq = arr => [...new Set(arr.filter(Boolean).map(s => s.trim()))].sort((a, b) => a.localeCompare(b, 'is'));
+  $('#beerList').innerHTML = uniq(state.beers.map(b => b.name)).map(s => `<option value="${esc(s)}">`).join('');
+  $('#styleList').innerHTML = uniq([...BASE_STYLES, ...state.reviews.map(r => r.style)]).map(s => `<option value="${esc(s)}">`).join('');
+  $('#breweryList').innerHTML = uniq(state.reviews.map(r => r.brewery)).map(s => `<option value="${esc(s)}">`).join('');
+}
+
+function visibleBeers() {
+  const q = state.q.trim().toLowerCase();
+  let list = state.beers.filter(b => state.filter === 'all' || b.reviews.some(isMine));
+  if (q) list = list.filter(b => [b.name, b.brewery, b.style, ...b.reviews.flatMap(r => [r.location, r.review, r.profiles?.display_name])]
+    .some(v => (v || '').toLowerCase().includes(q)));
+  const sorters = {
+    new: (a, b) => b.latest.localeCompare(a.latest),
+    top: (a, b) => b.avg - a.avg || b.reviews.length - a.reviews.length || a.name.localeCompare(b.name, 'is'),
+    name: (a, b) => a.name.localeCompare(b.name, 'is')
+  };
+  return [...list].sort(sorters[state.sort]);
+}
+
+function render() {
+  const list = visibleBeers();
+  if (state.filter === 'all') {
+    $('#summary').innerHTML = state.beers.length
+      ? `The crew has tried <b>${state.beers.length}</b> ${state.beers.length === 1 ? 'beer' : 'beers'} across <b>${state.reviews.length}</b> ${state.reviews.length === 1 ? 'review' : 'reviews'}.`
+      : '';
+  } else {
+    const mine = state.reviews.filter(isMine);
+    const avg = mine.length ? mine.reduce((s, r) => s + r.rating, 0) / mine.length : 0;
+    $('#summary').innerHTML = mine.length
+      ? `You've reviewed <b>${mine.length}</b> ${mine.length === 1 ? 'beer' : 'beers'}, averaging <b>${fmtAvg(avg)}</b> of 5 glasses.`
+      : '';
+  }
+
+  const grid = $('#grid');
+  if (!list.length) {
+    grid.innerHTML = state.q
+      ? `<div class="empty"><p>No beers match “${esc(state.q)}”.</p><button class="ghost" type="button" id="clearSearch">Clear search</button></div>`
+      : `<div class="empty"><p>No reviews yet. Add the first beer you try.</p><button class="primary" type="button" id="emptyAdd">Add a beer</button></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(card).join('');
+}
+
+function card(b) {
+  const n = b.reviews.length;
+  const ph = b.photo
+    ? `<img src="${esc(photoUrl(b.photo))}" alt="" loading="lazy">`
+    : `<div class="initial">${esc(b.name.charAt(0).toUpperCase())}</div>`;
+  const tags = [b.style, b.abv != null ? fmtAbv(b.abv) : null].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join('');
+  const names = [...new Set(b.reviews.map(whoName))];
+  const namesTxt = names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '');
+  const snip = b.reviews.find(r => r.review)?.review;
+  return `<button type="button" class="card" data-key="${esc(b.key)}" aria-label="${esc(b.name)}, average ${fmtAvg(b.avg)} of 5 from ${plural(n, 'review')}">
+    <div class="ph">${ph}</div>
+    <div class="cb">
+      <div class="head">
+        <div><h3>${esc(b.name)}</h3>${b.brewery ? `<p class="brew">${esc(b.brewery)}</p>` : ''}</div>
+        <div class="meter">${glassSvg(b.avg)}${fmtAvg(b.avg)}<small>/5</small></div>
+      </div>
+      ${tags ? `<p class="tags">${tags}</p>` : ''}
+      ${snip ? `<p class="snip">${esc(snip)}</p>` : ''}
+      <p class="by"><b>${plural(n, 'review')}</b> · ${esc(namesTxt)}</p>
+    </div>
+  </button>`;
+}
+
+// ─── Beer detail: everyone's reviews ───
+function openDetail(key) {
+  const b = state.beers.find(x => x.key === key);
+  if (!b) return;
+  state.openKey = key;
+  const n = b.reviews.length;
+  const tags = [b.style, b.abv != null ? fmtAbv(b.abv) : null].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join('');
+  const reviewsHtml = b.reviews.map(r => {
+    const meta = [r.location, fmtDate(r.drunk_on)].filter(Boolean).join(', ');
+    return `<div class="rev">
+      <div class="rev-head">${glassSvg(r.rating)}<div>
+        <b>${esc(whoName(r))}</b> · ${r.rating}/5 <span class="muted">${LABELS[r.rating]}</span>
+        ${meta ? `<div class="rev-meta">${esc(meta)}</div>` : ''}
+      </div></div>
+      ${r.review ? `<p class="rev-text">${esc(r.review)}</p>` : ''}
+      ${r.photo_path ? `<img class="rev-photo" src="${esc(photoUrl(r.photo_path))}" alt="Photo from ${esc(whoName(r))}" loading="lazy">` : ''}
+      ${isMine(r) ? `<div class="rev-actions"><button type="button" class="ghost small" data-act="edit" data-rid="${r.id}">Edit</button><button type="button" class="ghost small danger" data-act="delete" data-rid="${r.id}">Delete</button></div>` : ''}
+    </div>`;
+  }).join('');
+
+  $('#detail').innerHTML = `
+    ${b.photo ? `<img class="d-photo" src="${esc(photoUrl(b.photo))}" alt="Photo of ${esc(b.name)}">` : ''}
+    <div class="dlg">
+      <h2 class="d-title">${esc(b.name)}</h2>
+      ${b.brewery ? `<p class="brew" style="font-size:17px">${esc(b.brewery)}</p>` : ''}
+      ${tags ? `<p class="tags" style="margin-top:10px">${tags}</p>` : ''}
+      <div class="d-score">${glassSvg(b.avg)}<div><strong>${fmtAvg(b.avg)}/5</strong><span>${plural(n, 'review')}</span></div></div>
+      ${myReview(b) ? '' : `<p class="d-also"><button type="button" class="primary" data-act="also">Review this beer too</button></p>`}
+      ${reviewsHtml}
+      <div class="actions" style="margin-top:14px">
+        <button type="button" class="ghost" data-act="close">Close</button>
+      </div>
+    </div>`;
+  $('#detailDlg').showModal();
+}
+
+async function deleteReview(r) {
+  if (!confirm(`Delete your review of ${r.beer_name}?`)) return;
+  const { error } = await sb.from('reviews').delete().eq('id', r.id);
+  if (error) { toast('Couldn\'t delete: ' + error.message, true); return; }
+  if (r.photo_path) sb.storage.from(BUCKET).remove([r.photo_path]);
+  $('#detailDlg').close();
+  toast('Review deleted.');
+  await loadReviews();
+}
+
+// ─── Add / edit form ───
+function renderRatingInput() {
+  $('#rating').innerHTML = [1, 2, 3, 4, 5].map(n =>
+    `<button type="button" class="rbtn" data-n="${n}" aria-label="${n} of 5, ${LABELS[n]}" aria-pressed="${n === state.rating}">${glassSvg(n <= state.rating ? 5 : 0)}</button>`
+  ).join('') + `<span class="rlabel">${state.rating ? LABELS[state.rating] : 'Tap a glass'}</span>`;
+}
+
+function setPreview(url) {
+  const img = $('#preview');
+  img.hidden = !url;
+  if (url) img.src = url; else img.removeAttribute('src');
+  $('#removePhoto').hidden = !url;
+  $('#pickLabel').firstChild.textContent = url ? 'Change photo' : 'Choose photo';
+}
+
+// r = review to edit; beer = existing beer to add your own review to
+function openForm(r = null, beer = null) {
+  state.editing = r;
+  state.rating = r?.rating || 0;
+  state.photoFile = null;
+  state.removePhoto = false;
+  const f = $('#form');
+  f.reset();
+  const el = f.elements;
+  el.beer_name.value = r?.beer_name || beer?.name || '';
+  el.brewery.value = r?.brewery || beer?.brewery || '';
+  el.beer_style.value = r?.style || beer?.style || '';
+  const abv = r ? r.abv : beer?.abv;
+  el.abv.value = abv != null ? String(abv) : '';
+  el.location.value = r?.location || '';
+  el.drunk_on.value = r?.drunk_on || todayISO();
+  el.review.value = r?.review || '';
+  $('#formTitle').textContent = r ? 'Edit review' : beer ? `Your take on ${beer.name}` : 'Add a beer';
+  $('#saveBtn').textContent = r ? 'Save changes' : 'Save review';
+  setPreview(r?.photo_path ? photoUrl(r.photo_path) : '');
+  renderRatingInput();
+  $('#formDlg').showModal();
+}
+
+// When a known beer name is picked, fill in its details
+function autofillBeer() {
+  if (state.editing) return;
+  const el = $('#form').elements;
+  const b = state.beers.find(x => x.key === keyOf(el.beer_name.value));
+  if (!b) return;
+  if (!el.brewery.value && b.brewery) el.brewery.value = b.brewery;
+  if (!el.beer_style.value && b.style) el.beer_style.value = b.style;
+  if (!el.abv.value && b.abv != null) el.abv.value = String(b.abv);
+}
+
+async function compressPhoto(file) {
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch { bmp = await createImageBitmap(file); }
+  const max = 1400;
+  const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bmp.width * scale);
+  canvas.height = Math.round(bmp.height * scale);
+  canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(b => b ? resolve(b) : reject(new Error('That photo couldn\'t be read. Try a JPG or PNG.')), 'image/jpeg', 0.82));
+}
+
+async function saveReview(ev) {
+  ev.preventDefault();
+  const el = $('#form').elements;
+  const val = n => el[n].value.trim();
+  if (!val('beer_name')) { toast('Add the beer name.', true); el.beer_name.focus(); return; }
+  if (!state.rating) { toast('Pick a rating from 1 to 5 glasses.', true); return; }
+  const abvRaw = val('abv').replace(',', '.');
+  const abv = abvRaw === '' ? null : Number(abvRaw);
+  if (abv !== null && (Number.isNaN(abv) || abv < 0 || abv > 70)) { toast('ABV should be a number like 5.2', true); el.abv.focus(); return; }
+
+  const r = state.editing;
+  if (!r) {
+    const existing = state.reviews.find(x => isMine(x) && keyOf(x.beer_name) === keyOf(val('beer_name')));
+    if (existing && !confirm(`You've already reviewed ${existing.beer_name}. Add a second review anyway?`)) return;
+  }
+
+  const btn = $('#saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  let uploadedPath = null;
+  try {
+    const oldPath = r?.photo_path || null;
+    let photo_path = oldPath;
+    if (state.photoFile) {
+      const blob = await compressPhoto(state.photoFile);
+      uploadedPath = `${state.user.id}/${crypto.randomUUID()}.jpg`;
+      const { error } = await sb.storage.from(BUCKET).upload(uploadedPath, blob, { contentType: 'image/jpeg' });
+      if (error) { uploadedPath = null; throw error; }
+      photo_path = uploadedPath;
+    } else if (state.removePhoto) {
+      photo_path = null;
+    }
+
+    const row = {
+      beer_name: val('beer_name'),
+      brewery: val('brewery') || null,
+      style: val('beer_style') || null,
+      abv,
+      rating: state.rating,
+      review: val('review') || null,
+      location: val('location') || null,
+      drunk_on: val('drunk_on') || null,
+      photo_path
+    };
+    const { error } = r
+      ? await sb.from('reviews').update(row).eq('id', r.id)
+      : await sb.from('reviews').insert(row);
+    if (error) throw error;
+
+    if (oldPath && oldPath !== photo_path) sb.storage.from(BUCKET).remove([oldPath]);
+    $('#formDlg').close();
+    toast(r ? 'Changes saved.' : 'Review saved.');
+    await loadReviews();
+  } catch (err) {
+    if (uploadedPath) sb.storage.from(BUCKET).remove([uploadedPath]);
+    toast('Couldn\'t save: ' + (err.message || err), true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = r ? 'Save changes' : 'Save review';
+  }
+}
+
+// ─── Wiring ───
+function closeOnBackdrop(dlg) {
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+}
+
+function wire() {
+  $('#authForm').addEventListener('submit', authSubmit);
+  $('#authToggle').addEventListener('click', () => setAuthMode(state.authMode === 'in' ? 'up' : 'in'));
+  $('#signOut').addEventListener('click', () => sb.auth.signOut());
+
+  $('#q').addEventListener('input', () => { state.q = $('#q').value; render(); });
+  $('#sort').addEventListener('change', () => { state.sort = $('#sort').value; render(); });
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    state.filter = b.dataset.f;
+    document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    render();
+  }));
+
+  $('#addBtn').addEventListener('click', () => openForm());
+  $('#grid').addEventListener('click', e => {
+    const c = e.target.closest('.card');
+    if (c) return openDetail(c.dataset.key);
+    if (e.target.closest('#emptyAdd')) return openForm();
+    if (e.target.closest('#clearSearch')) { $('#q').value = ''; state.q = ''; render(); }
+  });
+
+  $('#detail').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    const r = state.reviews.find(x => x.id === btn.dataset.rid);
+    const b = state.beers.find(x => x.key === state.openKey);
+    if (act === 'close') $('#detailDlg').close();
+    if (act === 'edit' && r) { $('#detailDlg').close(); openForm(r); }
+    if (act === 'delete' && r) deleteReview(r);
+    if (act === 'also' && b) { $('#detailDlg').close(); openForm(null, b); }
+  });
+
+  $('#rating').addEventListener('click', e => {
+    const b = e.target.closest('.rbtn');
+    if (!b) return;
+    state.rating = Number(b.dataset.n);
+    renderRatingInput();
+    $('#rating').querySelector(`[data-n="${state.rating}"]`).focus();
+  });
+
+  $('#form').elements.beer_name.addEventListener('input', autofillBeer);
+
+  const photoInput = $('#photo');
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files && photoInput.files[0];
+    if (!file) return;
+    state.photoFile = file;
+    state.removePhoto = false;
+    setPreview(URL.createObjectURL(file));
+    photoInput.value = '';
+  });
+  $('#removePhoto').addEventListener('click', () => {
+    state.photoFile = null;
+    state.removePhoto = true;
+    setPreview('');
+  });
+
+  $('#form').addEventListener('submit', saveReview);
+  $('#cancelBtn').addEventListener('click', () => $('#formDlg').close());
+  closeOnBackdrop($('#formDlg'));
+  closeOnBackdrop($('#detailDlg'));
+
+  // Pick up friends' new reviews when you come back to the tab
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && state.user && !$('#formDlg').open && !$('#detailDlg').open) loadReviews();
+  });
+}
+
+async function init() {
+  if (!window.supabase) { document.body.textContent = 'Skál couldn\'t load. Check your connection and reload.'; return; }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  wire();
+  const { data: { session } } = await sb.auth.getSession();
+  await onSession(session);
+  sb.auth.onAuthStateChange((_event, s) => {
+    if ((s?.user?.id || null) !== (state.user?.id || null)) setTimeout(() => onSession(s), 0);
+  });
+}
+
+init();
+</script>
+</blockquote>
+</body>
+</html>
