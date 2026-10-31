@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="is">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Golfferðin – nóvember 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F7F8F4; --card:#FFFFFF; --soft:#ECF0EA; --ink:#13284A; --muted:#5A6A80; --line:#D6DCE2;
+  --fairway:#2D6B42; --fairway-ink:#FFFFFF; --flag:#F0BF2C; --over:#B6432C; --over2:#7E2A1A;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E192B; --card:#15233A; --soft:#1B2C47; --ink:#E9EEF6; --muted:#9AA9BF; --line:#2A3B57;
+    --fairway:#5DB37A; --fairway-ink:#0E192B; --flag:#F2C94C; --over:#EB7C61; --over2:#FFB3A1;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E192B; --card:#15233A; --soft:#1B2C47; --ink:#E9EEF6; --muted:#9AA9BF; --line:#2A3B57;
+  --fairway:#5DB37A; --fairway-ink:#0E192B; --flag:#F2C94C; --over:#EB7C61; --over2:#FFB3A1;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:84px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px}
+.cond{font-stretch:68%}
+h1,h2,h3{margin:0;line-height:1.1}
+h2{font-size:1.5rem;font-weight:800;font-stretch:78%;margin:28px 0 12px}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+
+/* Hero: next tee */
+.hero{padding:26px 0 20px;border-bottom:2px solid var(--ink)}
+.hero .lbl{font-size:.95rem;color:var(--muted);margin-bottom:6px}
+.hero .time{font-size:clamp(5rem,26vw,9.5rem);font-weight:800;font-stretch:62%;line-height:.82;letter-spacing:-.02em;display:flex;align-items:flex-end;gap:14px}
+.hero .pin{width:clamp(28px,8vw,46px);height:clamp(56px,16vw,92px);position:relative;flex:none;margin-bottom:6px}
+.hero .pin::before{content:"";position:absolute;left:0;bottom:0;width:3px;height:100%;background:var(--ink)}
+.hero .pin::after{content:"";position:absolute;left:3px;top:0;width:85%;height:42%;background:var(--flag);clip-path:polygon(0 0,100% 50%,0 100%)}
+.hero .where{font-size:1.6rem;font-weight:700;font-stretch:85%;margin-top:12px}
+.hero .when{color:var(--muted);margin-top:2px}
+
+/* Schedule */
+.day{display:grid;grid-template-columns:62px 1fr;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);text-align:left;background:none;border-left:0;border-right:0;border-top:0;width:100%}
+.day:hover .course{text-decoration:underline}
+.day .d{text-align:center}
+.day .d .n{font-size:2.6rem;font-weight:800;font-stretch:62%;line-height:.9}
+.day .d .w{font-size:.85rem;color:var(--muted)}
+.day .course{font-size:1.2rem;font-weight:700}
+.day .meta{color:var(--muted);font-size:.9rem;margin-top:2px}
+.fmt{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:600;background:var(--soft)}
+.fmt.real{background:var(--fairway);color:var(--fairway-ink)}
+.fmt.fun{background:var(--flag);color:#1A1A1A}
+.day.past{opacity:.6}
+
+/* Bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 12px;text-decoration:none;color:var(--muted);font-size:.8rem;font-weight:600}
+nav.tabs a svg{width:22px;height:22px}
+nav.tabs a[aria-current="page"]{color:var(--ink)}
+nav.tabs a[aria-current="page"] svg{color:var(--fairway)}
+
+/* Score view */
+.rpick{display:flex;gap:8px;overflow-x:auto;padding:16px 0 6px;scrollbar-width:none}
+.rpick::-webkit-scrollbar{display:none}
+.rpick button{flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:8px 12px;text-align:left;min-width:92px}
+.rpick button b{display:block;font-stretch:75%;font-size:1.05rem}
+.rpick button span{font-size:.78rem;color:var(--muted)}
+.rpick button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.rpick button[aria-pressed="true"] span{color:inherit;opacity:.75}
+.rhead{padding:10px 0 4px}
+.rhead h1{font-size:1.9rem;font-weight:800;font-stretch:75%}
+.rule{background:var(--soft);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:.93rem}
+.notice{border-left:4px solid var(--flag);background:var(--card);padding:10px 14px;margin:12px 0;font-size:.92rem;border-radius:0 10px 10px 0}
+.banner{background:var(--over);color:#fff;padding:10px 14px;border-radius:10px;margin:12px 0;font-size:.92rem}
+
+.hole{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:10px}
+.hole .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hole .num{font-size:3.2rem;font-weight:800;font-stretch:62%;line-height:.9}
+.hole .num small{font-size:1rem;font-weight:600;font-stretch:100%;color:var(--muted);display:block}
+.nav-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);font-size:1.4rem;line-height:1}
+.hinfo{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 6px;align-items:center}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:none;padding:6px 12px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.hinfo label{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hinfo select{border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:6px 8px;font-weight:700}
+.prow{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.prow:first-of-type{border-top:0}
+.pname{font-weight:700;font-size:1.05rem}
+.dots{color:var(--fairway);letter-spacing:2px;font-size:.8rem}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);font-size:1.4rem;font-weight:700;line-height:1}
+.step .v{width:46px;height:44px;border:0;background:none;text-align:center;font-size:1.7rem;font-weight:800;font-stretch:70%}
+.step .v.empty{color:var(--muted);font-size:1rem;font-weight:600;font-stretch:100%}
+.pts{min-width:54px;text-align:right;font-weight:700;font-stretch:80%}
+.pts small{display:block;font-weight:500;color:var(--muted);font-size:.75rem;font-stretch:100%}
+
+details.hcp{margin:14px 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 14px}
+details.hcp summary{padding:10px 0;font-weight:700;cursor:pointer}
+.hcpgrid{display:grid;grid-template-columns:1fr 90px;gap:8px 12px;align-items:center;padding-bottom:12px}
+.hcpgrid input{width:90px;padding:8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);text-align:center;font-weight:700}
+
+.sc-wrap{overflow-x:auto;margin:14px -18px 0;padding:0 18px}
+table.sc{border-collapse:collapse;font-size:.85rem;min-width:100%}
+table.sc th,table.sc td{border:1px solid var(--line);padding:0;text-align:center;min-width:30px;height:32px}
+table.sc th{background:var(--soft);font-weight:700;font-stretch:80%}
+table.sc td.nm,table.sc th.nm{text-align:left;padding:0 8px;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1}
+table.sc th.nm{background:var(--soft)}
+table.sc td.tot{font-weight:800;background:var(--soft)}
+table.sc tr.cur-col td.on, table.sc .on{outline:2px solid var(--ink);outline-offset:-2px}
+table.sc td button{all:unset;display:block;width:100%;height:32px;line-height:32px;cursor:pointer;font-weight:700}
+.sb{display:inline-block;width:24px;height:24px;line-height:22px;border-radius:50%}
+.s-under{border:2px solid var(--fairway);color:var(--fairway)}
+.s-eagle{background:var(--fairway);color:var(--fairway-ink);border-radius:50%}
+.s-bogey{color:var(--over)}
+.s-dbl{color:var(--over2);font-weight:800;text-decoration:underline}
+
+.result{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 16px 12px}
+.result h3{font-size:1.1rem;font-weight:800;margin:12px 0 4px}
+.rrow{display:grid;grid-template-columns:28px 1fr auto auto;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
+.rrow:last-child{border-bottom:0}
+.rrow .pos{font-weight:800;font-stretch:70%;font-size:1.2rem;color:var(--muted)}
+.rrow .val{font-weight:800;font-stretch:75%;font-size:1.2rem}
+.rrow .aw{font-size:.8rem;color:var(--muted);min-width:56px;text-align:right}
+.extra{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:.92rem}
+.extra select{border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:6px 8px}
+
+/* Leaderboard */
+.lb{margin-top:10px}
+.lbrow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.lbrow .rank{font-size:2.4rem;font-weight:800;font-stretch:62%;line-height:1}
+.lbrow:first-child .rank{color:var(--fairway)}
+.lbrow .who{font-size:1.25rem;font-weight:700}
+.lbrow .tot{font-size:2.4rem;font-weight:800;font-stretch:62%;line-height:1}
+.lbrow .bars{display:flex;gap:3px;margin-top:6px}
+.lbrow .bars i{display:block;width:22px;height:6px;border-radius:2px;background:var(--line)}
+.lbrow .bars i.f{background:var(--fairway)}
+table.grid{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:8px}
+table.grid th,table.grid td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+table.grid th:first-child,table.grid td:first-child{text-align:left}
+table.grid th{font-weight:700;font-stretch:80%;color:var(--muted)}
+
+/* Info */
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.fact b{display:block;font-size:1.8rem;font-weight:800;font-stretch:65%;line-height:1.05}
+.players{display:grid;gap:0}
+.players div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.compose{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.compose textarea{width:100%;min-height:76px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:10px;resize:vertical}
+.who-pick{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.who-pick button{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-weight:600}
+.who-pick button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn{border:0;background:var(--fairway);color:var(--fairway-ink);border-radius:12px;padding:10px 16px;font-weight:700}
+.note{padding:12px 0;border-bottom:1px solid var(--line)}
+.note .h{display:flex;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted)}
+.note .h b{color:var(--ink)}
+.note p{margin:4px 0 0;white-space:pre-wrap}
+.note .del{border:0;background:none;color:var(--muted);font-size:.8rem;text-decoration:underline}
+ul.pts-list{padding-left:18px;margin:6px 0}
+ul.pts-list li{margin:4px 0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<nav class="tabs" aria-label="Valmynd"><div class="in">
+  <a href="#dagskra" data-v="dagskra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Dagskrá</a>
+  <a href="#skor" data-v="skor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 21V3l11 4-11 4"/><ellipse cx="12" cy="21" rx="8" ry="1.5"/></svg>Skor</a>
+  <a href="#stada" data-v="stada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Staðan</a>
+  <a href="#upplysingar" data-v="upplysingar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Upplýsingar</a>
+  <a href="https://kire-code.github.io/Skal-/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/><path d="M5 8a2.5 2.5 0 0 1 2-4 3 3 0 0 1 5 0 2.5 2.5 0 0 1 3 4"/></svg>Skál</a>
+</div></nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ====== Supabase: Skal-verkefnið, taflan golf26 ====== */
+const SUPABASE_URL='https://xeqxwpprpcfjluudtsgo.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlcXh3cHBycGNmamx1dWR0c2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzIyMjEsImV4cCI6MjEwNjI0ODIyMX0.7eSJ0xfBQOqwqECAYK5pON9EkQ-YJE64BlHMwzxaplQ';
+/* ======================================================================= */
+const PLAYERS=[
+  {id:'erik',name:'Erik',idx:36.2},
+  {id:'reynir',name:'Reynir',idx:24},
+  {id:'dori',name:'Dóri',idx:13},
+  {id:'nonni',name:'Nonni',idx:36.2}
+];
+const P=Object.fromEntries(PLAYERS.map(p=>[p.id,p]));
+const COURSES={
+  campoamor:'Campoamor', laserena:'La Serena', vistabella:'Vistabella', newsierra:'New Sierra', lasramblas:'Las Ramblas'
+};
+const FORMATS={
+  stableford:{name:'Punktakeppni',kind:'real',rule:'Hver leikur sinn bolta með fullri leikforgjöf. Nettó par gefur 2 punkta, nettó fugl 3, nettó skolli 1. Flestir punktar vinna.'},
+  fourball:{name:'Betri bolti',kind:'fun',rule:'Tveir og tveir saman. Hvor leikur sinn bolta og betri punktafjöldinn á hverri holu gildir fyrir liðið. Leikforgjöf er 85% af fullri.'},
+  scramble:{name:'Texas scramble',kind:'fun',rule:'Báðir í liðinu slá, liðið velur besta boltann og báðir slá aftur þaðan, alla leið ofan í. Eitt skor á lið. Forgjöf liðs er 35% af lægri leikforgjöf plús 15% af hærri.'},
+  skins:{name:'Skins',kind:'fun',rule:'Hver hola er einn vinningur. Lægsta nettóskorið vinnur holuna, en ef tveir eða fleiri eru jafnir flyst vinningurinn yfir á næstu holu og potturinn stækkar. Gengið í dag, engir bílar.'}
+};
+const ROUNDS=[
+  {id:'r1',date:'2026-11-01',wd:'sun',time:'11:40',course:'campoamor',fmt:'stableford',title:'Upphitun',buggies:'2 golfbílar',price:394,extra:'Næstur holu á par 3'},
+  {id:'r2',date:'2026-11-02',wd:'mán',time:'09:56',course:'campoamor',fmt:'fourball',title:'Liðakeppni',teams:[['erik','dori'],['reynir','nonni']],buggies:'2 golfbílar',price:394,extra:'Lengsta teighögg á braut'},
+  {id:'r3',date:'2026-11-03',wd:'þri',time:'10:06',course:'laserena',fmt:'scramble',title:'Scramble-dagurinn',teams:[['erik','reynir'],['dori','nonni']],buggies:'2 golfbílar',price:344,extra:'Lengsta pútt sem fer ofan í'},
+  {id:'r4',date:'2026-11-04',wd:'mið',time:'10:20',course:'vistabella',fmt:'stableford',title:'Alvöru golf',buggies:'2 golfbílar',price:514,extra:'Næstur holu á par 3'},
+  {id:'r5',date:'2026-11-05',wd:'fim',time:'13:10',course:'newsierra',fmt:'skins',title:'Gönguhringurinn',buggies:'Engir bílar, gengið',price:200,extra:'Besta högg úr glompu'},
+  {id:'r6',date:'2026-11-06',wd:'fös',time:'10:20',course:'lasramblas',fmt:'stableford',title:'Lokahringurinn',double:true,buggies:'2 golfbílar',price:462,extra:'Næstur holu á par 3'}
+];
+const R=Object.fromEntries(ROUNDS.map(r=>[r.id,r]));
+const MONTH='nóv.';
+
+function teeUTC(r){const [y,m,d]=r.date.split('-').map(Number);const [h,mi]=r.time.split(':').map(Number);return Date.UTC(y,m-1,d,h-1,mi);} // CET = UTC+1 in Nov
+function madridDate(){try{return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Madrid'});}catch(e){return new Date().toISOString().slice(0,10);}}
+
+/* ---------- state ---------- */
+const state={cards:{},courses:{},extras:{},notes:[]};
+let db=null, readOnly=false, dbFailed=false, writeError=false;
+const pending={};
+const ui={view:'dagskra',round:defaultRound(),hole:1,author:null};
+try{ui.author=localStorage.getItem('golf26-author');}catch(e){}
+
+function defaultRound(){
+  const today=madridDate();
+  const r=ROUNDS.find(r=>r.date>=today);
+  return r?r.id:'r6';
+}
+function entities(r){
+  if(r.fmt==='scramble') return r.teams.map((t,i)=>({id:'t'+i,name:t.map(id=>P[id].name).join(' & '),members:t}));
+  return PLAYERS.map(p=>({id:p.id,name:p.name,members:[p.id]}));
+}
+function defaultPh(r,e){
+  if(r.fmt==='scramble'){const h=e.members.map(id=>Math.round(P[id].idx));return Math.round(0.35*Math.min(...h)+0.15*Math.max(...h));}
+  const full=Math.round(P[e.id].idx);
+  return r.fmt==='fourball'?Math.round(full*0.85):full;
+}
+function card(r,e){
+  const c=state.cards[r.id+'_'+e.id];
+  return {strokes:(c&&Array.isArray(c.strokes)?c.strokes:Array(18).fill(null)).map(v=>v==null?null:Number(v)),ph:(c&&c.ph!=null)?Number(c.ph):defaultPh(r,e)};
+}
+function course(id){
+  const c=state.courses[id];
+  if(c&&Array.isArray(c.par)&&Array.isArray(c.si)) return {par:c.par.map(Number),si:c.si.map(Number),ok:!!c.ok};
+  return {par:Array(18).fill(4),si:Array.from({length:18},(_,i)=>i+1),ok:false};
+}
+function rec(ph,si){if(ph<0)return 0;return Math.floor(ph/18)+((ph%18)>=si?1:0);}
+function stb(g,par,r){return g==null?null:Math.max(0,par+r-g+2);}
+
+/* ---------- scoring ---------- */
+function rankAward(list,higherBetter){
+  // list: [{id,v}] -> {id:points} using 4/3/2/1 split on ties
+  const pts=[4,3,2,1];const out={};
+  const s=[...list].sort((a,b)=>higherBetter?b.v-a.v:a.v-b.v);
+  let i=0;
+  while(i<s.length){let j=i;while(j+1<s.length&&s[j+1].v===s[i].v)j++;
+    let sum=0;for(let k=i;k<=j;k++)sum+=pts[k]||0;const each=sum/(j-i+1);
+    for(let k=i;k<=j;k++)out[s[k].id]=each;i=j+1;}
+  return out;
+}
+function roundResult(r){
+  const c=course(r.course), ents=entities(r);
+  const res={rows:[],awards:{},started:false,complete:false,unit:''};
+  const cards=Object.fromEntries(ents.map(e=>[e.id,card(r,e)]));
+  const anyEntered=ents.some(e=>cards[e.id].strokes.some(v=>v!=null));
+  res.started=anyEntered;
+  res.complete=ents.every(e=>cards[e.id].strokes.every(v=>v!=null));
+  const mult=r.double?2:1;
+  if(r.fmt==='stableford'){
+    res.unit='punktar';
+    ents.forEach(e=>{const cd=cards[e.id];let t=0,n=0,g=0;cd.strokes.forEach((s,h)=>{if(s!=null){t+=stb(s,c.par[h],rec(cd.ph,c.si[h]));n++;g+=s;}});res.rows.push({id:e.id,name:e.name,v:t,sub:n?`${n} holur, ${g} högg`:'ekki byrjaður'});});
+    if(anyEntered){const a=rankAward(res.rows,true);for(const k in a)res.awards[k]=a[k]*mult;}
+    res.rows.sort((a,b)=>b.v-a.v);
+  }
+  if(r.fmt==='fourball'){
+    res.unit='punktar';
+    const teams=r.teams.map((t,i)=>{let tot=0,n=0;for(let h=0;h<18;h++){const vals=t.map(id=>{const cd=cards[id];const s=cd.strokes[h];return s==null?null:stb(s,c.par[h],rec(cd.ph,c.si[h]));}).filter(v=>v!=null);if(vals.length){tot+=Math.max(...vals);n++;}}return {id:'t'+i,name:t.map(id=>P[id].name).join(' & '),v:tot,sub:n?`${n} holur`:'ekki byrjaðir',members:t};});
+    res.rows=teams.sort((a,b)=>b.v-a.v);
+    if(anyEntered) teamAward(res,teams,true,mult);
+  }
+  if(r.fmt==='scramble'){
+    res.unit='nettó';
+    const teams=ents.map(e=>{const cd=cards[e.id];let rel=0,n=0,g=0;cd.strokes.forEach((s,h)=>{if(s!=null){rel+=s-rec(cd.ph,c.si[h])-c.par[h];n++;g+=s;}});return {id:e.id,name:e.name,v:rel,disp:n?(rel===0?'E':(rel>0?'+'+rel:String(rel))):'–',sub:n?`${n} holur, ${g} högg brúttó`:'ekki byrjaðir',members:e.members,n};});
+    res.rows=[...teams].sort((a,b)=>(b.n?1:0)-(a.n?1:0)||a.v-b.v);
+    if(anyEntered) teamAward(res,teams,false,mult);
+  }
+  if(r.fmt==='skins'){
+    res.unit='skins';
+    const won=Object.fromEntries(ents.map(e=>[e.id,0]));let carry=0;const holes=[];
+    for(let h=0;h<18;h++){
+      const nets=ents.map(e=>{const cd=cards[e.id];const s=cd.strokes[h];return s==null?null:{id:e.id,n:s-rec(cd.ph,c.si[h])};});
+      if(nets.some(x=>x==null)){holes.push(null);continue;}
+      const m=Math.min(...nets.map(x=>x.n));const w=nets.filter(x=>x.n===m);
+      carry+=1;
+      if(w.length===1){won[w[0].id]+=carry;holes.push({w:w[0].id,v:carry});carry=0;}else holes.push({w:null,v:0});
+    }
+    res.carry=carry;res.holes=holes;
+    res.rows=ents.map(e=>({id:e.id,name:e.name,v:won[e.id],sub:''})).sort((a,b)=>b.v-a.v);
+    if(holes.some(x=>x)){const a=rankAward(res.rows,true);for(const k in a)res.awards[k]=a[k]*mult;}
+  }
+  const ex=state.extras[r.id];
+  if(ex&&ex.winner&&P[ex.winner]) res.awards[ex.winner]=(res.awards[ex.winner]||0)+1;
+  return res;
+}
+function teamAward(res,teams,higherBetter,mult){
+  const [a,b]=teams;let wa=2,wb=2;
+  if(a.v!==b.v){const aWins=higherBetter?a.v>b.v:a.v<b.v;wa=aWins?3:1;wb=aWins?1:3;}
+  a.members.forEach(id=>res.awards[id]=wa*mult);b.members.forEach(id=>res.awards[id]=wb*mult);
+  a.aw=wa*mult;b.aw=wb*mult;
+}
+
+/* ---------- persistence ---------- */
+function saveLocal(){if(db)return;try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes}));}catch(e){}}
+function loadLocal(){try{const s=JSON.parse(localStorage.getItem('golf26-state')||'null');if(s){Object.assign(state,s);}}catch(e){}}
+function queueWrite(col,id,data){
+  const key=col+'/'+id;
+  if(!db){saveLocal();return;}
+  clearTimeout(pending[key]?.t);
+  pending[key]={t:setTimeout(async()=>{
+    const {error}=await db.from('golf26').upsert({col,id,data,updated_at:new Date().toISOString()});
+    delete pending[key];
+    if(error){writeError=true;render();}
+  },500),data};
+}
+function setStroke(r,e,h,val){
+  const c=card(r,e);c.strokes[h]=val;
+  state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph:c.ph};
+  queueWrite('cards',r.id+'_'+e.id,state.cards[r.id+'_'+e.id]);
+}
+function setPh(r,e,ph){
+  const c=card(r,e);c.ph=ph;state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph};
+  queueWrite('cards',r.id+'_'+e.id,state.cards[r.id+'_'+e.id]);
+}
+function setCourse(id,patch){
+  const c=course(id);const n={par:c.par,si:c.si,ok:true,...patch};state.courses[id]=n;queueWrite('courses',id,n);
+}
+
+function applyRow(col,id,data,deleted){
+  if(col==='notes'){
+    state.notes=state.notes.filter(n=>n.id!==id);
+    if(!deleted&&data)state.notes.push({id,...data});
+    return;
+  }
+  if(!state[col]||pending[col+'/'+id])return;
+  if(deleted)delete state[col][id];else state[col][id]=data;
+}
+async function loadAll(){
+  const {data,error}=await db.from('golf26').select('col,id,data');
+  if(error){dbFailed=true;render();return;}
+  dbFailed=false;
+  state.cards={};state.courses={};state.extras={};state.notes=[];
+  data.forEach(r=>applyRow(r.col,r.id,r.data,false));
+  render();
+}
+async function connect(){
+  loadLocal();
+  const configured=window.supabase&&!SUPABASE_URL.includes('XXXX');
+  if(!configured){dbFailed=true;render();return;}
+  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  await loadAll();
+  db.channel('golf26').on('postgres_changes',{event:'*',schema:'public',table:'golf26'},payload=>{
+    if(payload.eventType==='DELETE'){const o=payload.old||{};applyRow(o.col,o.id,null,true);}
+    else{const n=payload.new;applyRow(n.col,n.id,n.data,false);}
+    render();
+  }).subscribe();
+  // símar sofna: sækja allt aftur þegar síðan er opnuð á ný
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadAll();});
+}
+
+/* ---------- rendering ---------- */
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function dayNum(r){return Number(r.date.slice(8));}
+function fmtChip(r){const f=FORMATS[r.fmt];return `<span class="fmt ${f.kind}">${f.name}${r.double?', tvöföld stig':''}</span>`;}
+
+function countdown(ms){
+  const m=Math.round(ms/60000);if(m<60)return `eftir ${m} mín.`;
+  const h=Math.floor(m/60);if(h<24)return `eftir ${h} klst. ${m%60} mín.`;
+  const d=Math.floor(h/24);return `eftir ${d} ${d===1?'dag':'daga'} og ${h%24} klst.`;
+}
+function heroHTML(){
+  const now=Date.now();
+  const next=ROUNDS.find(r=>teeUTC(r)+5*3600e3>now);
+  if(!next){
+    const lb=leaderboard();const w=lb[0];
+    return `<section class="hero"><div class="lbl">Ferðinni er lokið</div><div class="time"><span class="pin" aria-hidden="true"></span>${esc(w.name)}</div><div class="where">vann bikarinn með ${fmtNum(w.total)} stig</div></section>`;
+  }
+  const diff=teeUTC(next)-now;
+  const when=diff>0?countdown(diff):'Í gangi núna';
+  return `<section class="hero"><div class="lbl">Næsti teigur</div><div class="time"><span class="pin" aria-hidden="true"></span><span>${next.time}</span></div><div class="where">${COURSES[next.course]}</div><div class="when">${next.wd}. ${dayNum(next)}. ${MONTH}, ${when}. ${FORMATS[next.fmt].name}.</div></section>`;
+}
+function renderSchedule(){
+  const now=Date.now();
+  const total=ROUNDS.reduce((s,r)=>s+r.price,0);
+  app.innerHTML=heroHTML()+`<h2>Dagskráin</h2>`+ROUNDS.map(r=>{
+    const past=teeUTC(r)+6*3600e3<now;
+    const teams=r.teams?`<div class="meta">${r.teams.map(t=>t.map(id=>P[id].name).join(' & ')).join(' gegn ')}</div>`:'';
+    return `<button class="day ${past?'past':''}" data-go="${r.id}"><div class="d"><div class="n">${dayNum(r)}</div><div class="w">${r.wd}.</div></div><div><div class="course">${COURSES[r.course]}, kl. ${r.time}</div><div class="meta">${esc(r.title)}. ${r.buggies}. ${r.price} € fyrir hópinn.</div>${teams}${fmtChip(r)}</div></button>`;
+  }).join('')+`<p class="muted small" style="margin-top:14px">Vallargjöld samtals ${total.toLocaleString('is-IS')} €, sem gerir ${(total/4).toLocaleString('is-IS')} € á mann. Rástímar eru staðartími á Spáni.</p>`;
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ui.round=b.dataset.go;ui.hole=firstOpenHole(R[ui.round]);location.hash='skor';});
+}
+function firstOpenHole(r){const es=entities(r);for(let h=0;h<18;h++){if(es.some(e=>card(r,e).strokes[h]==null))return h+1;}return 18;}
+
+function scoreClass(g,par,recv){if(g==null)return'';const d=g-recv-par;if(d<=-2)return's-eagle';if(d===-1)return's-under';if(d===1)return's-bogey';if(d>=2)return's-dbl';return'';}
+
+function renderScore(){
+  const r=R[ui.round], c=course(r.course), ents=entities(r), f=FORMATS[r.fmt];
+  const h=ui.hole-1;
+  const res=roundResult(r);
+  let html=`<div class="rpick" role="group" aria-label="Veldu hring">${ROUNDS.map(x=>`<button aria-pressed="${x.id===r.id}" data-r="${x.id}"><b>${dayNum(x)}. ${MONTH}</b><span>${COURSES[x.course]}</span></button>`).join('')}</div>`;
+  html+=`<div class="rhead"><h1>${COURSES[r.course]}</h1><div class="muted">${r.wd}. ${dayNum(r)}. ${MONTH} kl. ${r.time}. ${esc(r.title)}.</div>${fmtChip(r)}</div>`;
+  html+=`<div class="rule">${f.rule}${r.double?' Á lokadeginum gilda tvöföld stig í bikarnum.':''}</div>`;
+  if(writeError) html+=`<div class="banner">Síðasta skor vistaðist ekki. Athugaðu netsambandið og skráðu holuna aftur.</div>`;
+  if(dbFailed) html+=`<div class="notice">Ekki næst samband við sameiginlega skorið, svo skor vistast bara í þessu tæki í bili.</div>`;
+  if(!c.ok) html+=`<div class="notice">Stilltu par og holuforgjöf (HCP) fyrir hverja holu af skorkortinu. Punktar og nettóskor reiknast rétt þegar það er komið, og stillingin gildir fyrir alla.</div>`;
+
+  html+=`<section class="hole" aria-label="Hola ${ui.hole}"><div class="top"><button class="nav-btn" data-hole="-1" aria-label="Fyrri hola">‹</button><div class="num" style="text-align:center"><small>Hola</small>${ui.hole}</div><button class="nav-btn" data-hole="1" aria-label="Næsta hola">›</button></div>`;
+  html+=`<div class="hinfo"><div class="seg" role="group" aria-label="Par">${[3,4,5].map(p=>`<button data-par="${p}" aria-pressed="${c.par[h]===p}">Par ${p}</button>`).join('')}</div><label>HCP <select data-si>${Array.from({length:18},(_,i)=>`<option ${c.si[h]===i+1?'selected':''}>${i+1}</option>`).join('')}</select></label></div>`;
+  ents.forEach(e=>{
+    const cd=card(r,e), g=cd.strokes[h], rv=rec(cd.ph,c.si[h]);
+    let right='';
+    if(r.fmt==='scramble'||r.fmt==='skins'){right=g==null?'':`${g-rv} <small>nettó</small>`;}
+    else{right=g==null?'':`${stb(g,c.par[h],rv)} <small>punktar</small>`;}
+    html+=`<div class="prow"><div><div class="pname">${esc(e.name)}</div><div class="dots" title="Högg í forgjöf á holu">${'●'.repeat(rv)}<span class="muted small" style="letter-spacing:0">${rv?` ${rv} í forgjöf`:'ekkert högg í forgjöf'}</span></div></div>
+      <div class="step"><button data-st="${e.id}" data-d="-1" aria-label="Færri högg hjá ${esc(e.name)}" ${readOnly?'disabled':''}>−</button><button class="v ${g==null?'empty':''}" data-st="${e.id}" data-d="0" aria-label="Högg hjá ${esc(e.name)}" ${readOnly?'disabled':''}>${g==null?'Skrá':g}</button><button data-st="${e.id}" data-d="1" aria-label="Fleiri högg hjá ${esc(e.name)}" ${readOnly?'disabled':''}>+</button></div>
+      <div class="pts">${right}</div></div>`;
+  });
+  html+=`</section>`;
+
+  html+=`<details class="hcp"><summary>Leikforgjöf í þessum hring</summary><div class="hcpgrid">${ents.map(e=>`<label for="ph-${e.id}">${esc(e.name)}${r.fmt==='scramble'?'':` <span class="muted small">(${String(P[e.id].idx).replace('.',',')})</span>`}</label><input id="ph-${e.id}" type="number" inputmode="numeric" min="0" max="60" value="${card(r,e).ph}" data-ph="${e.id}" ${readOnly?'disabled':''}>`).join('')}</div><p class="muted small" style="margin:0 0 12px">Sjálfgefið er reiknað út frá forgjöf. Ef skorkortið eða teigtaflan gefur aðra vallarforgjöf, leiðréttu hér.</p></details>`;
+
+  // scorecard table
+  const cols=[...Array(9).keys()].map(i=>i).concat(['out']).concat([...Array(9).keys()].map(i=>i+9)).concat(['in','tot']);
+  const sumRange=(arr,a,b)=>arr.slice(a,b).reduce((s,v)=>s+(v||0),0);
+  html+=`<div class="sc-wrap"><table class="sc"><thead><tr><th class="nm">Hola</th>${cols.map(k=>typeof k==='number'?`<th class="${k===h?'on':''}">${k+1}</th>`:`<th>${k==='out'?'Út':k==='in'?'Inn':'Alls'}</th>`).join('')}</tr></thead><tbody>`;
+  html+=`<tr><td class="nm muted">Par</td>${cols.map(k=>typeof k==='number'?`<td>${c.par[k]}</td>`:`<td class="tot">${k==='out'?sumRange(c.par,0,9):k==='in'?sumRange(c.par,9,18):sumRange(c.par,0,18)}</td>`).join('')}</tr>`;
+  html+=`<tr><td class="nm muted">HCP</td>${cols.map(k=>typeof k==='number'?`<td class="muted">${c.si[k]}</td>`:`<td class="tot"></td>`).join('')}</tr>`;
+  ents.forEach(e=>{
+    const cd=card(r,e);
+    html+=`<tr><td class="nm"><b>${esc(e.name)}</b></td>${cols.map(k=>{
+      if(typeof k==='number'){const g=cd.strokes[k];return `<td class="${k===h?'on':''}"><button data-jump="${k+1}" aria-label="Hola ${k+1}">${g==null?'':`<span class="sb ${scoreClass(g,c.par[k],rec(cd.ph,c.si[k]))}">${g}</span>`}</button></td>`;}
+      const a=k==='out'?0:k==='in'?9:0,b=k==='out'?9:18;return `<td class="tot">${sumRange(cd.strokes,a,b)||''}</td>`;
+    }).join('')}</tr>`;
+    if(r.fmt==='stableford'||r.fmt==='fourball'){
+      html+=`<tr><td class="nm muted small">punktar</td>${cols.map(k=>{
+        if(typeof k==='number'){const g=cd.strokes[k];return `<td class="muted">${g==null?'':stb(g,c.par[k],rec(cd.ph,c.si[k]))}</td>`;}
+        const a=k==='out'?0:k==='in'?9:0,b=k==='out'?9:18;let s=0;for(let i=a;i<b;i++){const g=cd.strokes[i];if(g!=null)s+=stb(g,c.par[i],rec(cd.ph,c.si[i]));}return `<td class="tot">${s||''}</td>`;
+      }).join('')}</tr>`;
+    }
+  });
+  if(r.fmt==='skins'){
+    html+=`<tr><td class="nm muted small">skin</td>${cols.map(k=>{if(typeof k!=='number')return '<td class="tot"></td>';const x=res.holes[k];return `<td class="small">${x?(x.w?esc(P[x.w].name.slice(0,2))+(x.v>1?'×'+x.v:''):'=') :''}</td>`;}).join('')}</tr>`;
+  }
+  html+=`</tbody></table></div>`;
+
+  // result
+  html+=`<section class="result"><h3>${res.complete?'Úrslit':'Staðan í hringnum'}</h3>`;
+  res.rows.forEach((row,i)=>{
+    const aw=r.fmt==='fourball'||r.fmt==='scramble'?row.aw:res.awards[row.id];
+    const val=row.disp!=null?row.disp:row.v;
+    html+=`<div class="rrow"><div class="pos">${i+1}</div><div><b>${esc(row.name)}</b>${row.sub?`<div class="muted small">${row.sub}</div>`:''}</div><div class="val">${val} <span class="muted small" style="font-weight:500">${res.unit}</span></div><div class="aw">${res.started&&aw!=null?`${fmtNum(aw)} stig${res.complete?'':' (í gangi)'}`:''}</div></div>`;
+  });
+  if(r.fmt==='skins'&&res.carry) html+=`<p class="muted small">${res.carry} ${res.carry===1?'skin bíður':'skins bíða'} á næstu holu.</p>`;
+  const ex=state.extras[r.id]||{};
+  html+=`<div class="extra"><label for="ex">Aukaverðlaun, ${esc(r.extra.charAt(0).toLowerCase()+r.extra.slice(1))} (1 stig):</label><select id="ex" ${readOnly?'disabled':''}><option value="">Enginn ennþá</option>${PLAYERS.map(p=>`<option value="${p.id}" ${ex.winner===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div></section>`;
+
+  app.innerHTML=html;
+  const cur=app.querySelector('.rpick [aria-pressed="true"]');cur&&cur.scrollIntoView({block:'nearest',inline:'center'});
+
+  app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ui.round=b.dataset.r;ui.hole=firstOpenHole(R[ui.round]);render();});
+  app.querySelectorAll('[data-hole]').forEach(b=>b.onclick=()=>{ui.hole=Math.min(18,Math.max(1,ui.hole+Number(b.dataset.hole)));render();});
+  app.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{ui.hole=Number(b.dataset.jump);render();app.querySelector('.hole').scrollIntoView({behavior:'smooth',block:'start'});});
+  app.querySelectorAll('[data-par]').forEach(b=>b.onclick=()=>{if(readOnly)return;const p=course(r.course).par.slice();p[h]=Number(b.dataset.par);setCourse(r.course,{par:p});render();});
+  const si=app.querySelector('[data-si]');si.onchange=()=>{if(readOnly)return;const s=course(r.course).si.slice();s[h]=Number(si.value);setCourse(r.course,{si:s});render();};
+  app.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{
+    const e=ents.find(x=>x.id===b.dataset.st);const g=card(r,e).strokes[h];const d=Number(b.dataset.d);const par=course(r.course).par[h];
+    let v;if(g==null)v=d<0?par-1:(d>0?par+1:par);else if(d===0)return;else v=g+d;
+    if(v<1)v=null;if(v>15)v=15;
+    setStroke(r,e,h,v);render();
+  });
+  app.querySelectorAll('[data-ph]').forEach(inp=>inp.onchange=()=>{const e=ents.find(x=>x.id===inp.dataset.ph);const v=Math.max(0,Math.min(60,Math.round(Number(inp.value)||0)));setPh(r,e,v);render();});
+  const exSel=app.querySelector('#ex');exSel.onchange=()=>{state.extras[r.id]={winner:exSel.value||null};queueWrite('extras',r.id,state.extras[r.id]);render();};
+}
+
+function fmtNum(n){return Number.isInteger(n)?String(n):n.toFixed(1).replace('.',',');}
+function leaderboard(){
+  const tot=Object.fromEntries(PLAYERS.map(p=>[p.id,{id:p.id,name:p.name,total:0,per:{}}]));
+  ROUNDS.forEach(r=>{const res=roundResult(r);for(const k in res.awards){tot[k].total+=res.awards[k];tot[k].per[r.id]=res.awards[k];}});
+  return Object.values(tot).sort((a,b)=>b.total-a.total);
+}
+function renderStandings(){
+  const lb=leaderboard();
+  const max=Math.max(1,...lb.map(x=>x.total));
+  let html=`<h2 style="margin-top:26px">Bikarinn</h2><p class="muted small" style="margin:-4px 0 6px">Stig safnast í hverjum hring. Sá sem er efstur eftir Las Ramblas tekur bikarinn heim.</p><div class="lb">`;
+  let lastV=null,lastRank=0;
+  lb.forEach((x,i)=>{const rank=x.total===lastV?lastRank:i+1;lastV=x.total;lastRank=rank;
+    html+=`<div class="lbrow"><div class="rank">${rank}</div><div><div class="who">${esc(x.name)}</div><div class="bars" aria-hidden="true">${ROUNDS.map(r=>`<i class="${x.per[r.id]!=null?'f':''}" title="${COURSES[r.course]}"></i>`).join('')}</div></div><div class="tot">${fmtNum(x.total)}</div></div>`;});
+  html+=`</div><h2>Stig eftir dögum</h2><div class="sc-wrap"><table class="grid"><thead><tr><th>Dagur</th>${PLAYERS.map(p=>`<th>${p.name}</th>`).join('')}</tr></thead><tbody>`;
+  ROUNDS.forEach(r=>{const res=roundResult(r);html+=`<tr><td>${dayNum(r)}. ${COURSES[r.course]}<div class="muted small">${FORMATS[r.fmt].name}${r.double?', tvöföld':''}</div></td>${PLAYERS.map(p=>`<td>${res.awards[p.id]!=null?fmtNum(res.awards[p.id]):'–'}</td>`).join('')}</tr>`;});
+  html+=`</tbody></table></div>`;
+  html+=`<h2>Svona gefast stigin</h2><ul class="pts-list"><li>Einstaklingshringir og skins: 4 stig fyrir 1. sæti, 3 fyrir 2., 2 fyrir 3. og 1 fyrir 4. Jöfn sæti skipta stigunum á milli sín.</li><li>Liðahringir: 3 stig á hvorn í sigurliðinu, 1 á hvorn í hinu, 2 á alla ef jafnt.</li><li>Aukaverðlaun dagsins gefa 1 stig.</li><li>Lokahringurinn á Las Ramblas gefur tvöföld stig.</li></ul>`;
+  app.innerHTML=html;
+}
+function renderInfo(){
+  const total=ROUNDS.reduce((s,r)=>s+r.price,0);
+  let html=`<h2 style="margin-top:26px">Ferðin í tölum</h2><div class="facts"><div class="fact"><b>6</b>hringir á 5 völlum</div><div class="fact"><b>${(total/4).toLocaleString('is-IS')} €</b>vallargjöld á mann</div><div class="fact"><b>${total.toLocaleString('is-IS')} €</b>samtals fyrir hópinn</div><div class="fact"><b>10</b>golfbílar bókaðir</div></div>`;
+  html+=`<h2>Bjórinn</h2><p>Á 19. holu skráum við bjórana í <a href="https://kire-code.github.io/Skal-/" target="_blank" rel="noopener" style="color:var(--fairway);font-weight:700">Skál</a>. Gefðu einkunn og sjáðu hvað hinir fengu sér.</p>`;
+  html+=`<h2>Kylfingarnir</h2><div class="players">${PLAYERS.map(p=>`<div><b>${p.name}</b><span class="muted">forgjöf ${String(p.idx).replace('.',',')}</span></div>`).join('')}</div>`;
+  html+=`<h2>Tilkynningatafla</h2><div class="compose"><label for="nt" class="small muted">Kvöldmatur, akstur, hver skuldar hverjum bjór…</label><textarea id="nt" placeholder="Skrifa skilaboð" ${readOnly?'disabled':''}></textarea><div class="who-pick" role="group" aria-label="Hver skrifar">${PLAYERS.map(p=>`<button data-au="${p.id}" aria-pressed="${ui.author===p.id}">${p.name}</button>`).join('')}</div><button class="btn" id="post" ${readOnly?'disabled':''}>Setja inn</button></div>`;
+  const notes=[...state.notes].sort((a,b)=>(b.at||0)-(a.at||0));
+  html+=notes.length?notes.map(n=>`<div class="note"><div class="h"><span><b>${esc(P[n.by]?.name||'Einhver')}</b>, ${new Date(n.at).toLocaleString('is-IS',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span><button class="del" data-del="${esc(n.id)}" ${readOnly?'disabled':''}>Eyða</button></div><p>${esc(n.text)}</p></div>`).join(''):`<p class="muted">Engin skilaboð ennþá. Settu inn það fyrsta, til dæmis hvar þið borðið í kvöld.</p>`;
+  app.innerHTML=html;
+  app.querySelectorAll('[data-au]').forEach(b=>b.onclick=()=>{ui.author=b.dataset.au;try{localStorage.setItem('golf26-author',ui.author);}catch(e){}renderInfo();});
+  app.querySelector('#post').onclick=async()=>{
+    const t=app.querySelector('#nt').value.trim();if(!t)return;
+    const by=ui.author||'erik';const n={text:t.slice(0,2000),by,at:Date.now()};
+    const id=(crypto.randomUUID?crypto.randomUUID():'n'+Date.now()+Math.random().toString(36).slice(2));
+    state.notes.push({id,...n});
+    if(db){const {error}=await db.from('golf26').insert({col:'notes',id,data:n});if(error)writeError=true;}
+    else saveLocal();
+    render();
+  };
+  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    const id=b.dataset.del;
+    state.notes=state.notes.filter(n=>n.id!==id);
+    if(db){await db.from('golf26').delete().eq('col','notes').eq('id',id);}
+    else saveLocal();
+    render();
+  });
+}
+
+function render(){
+  const focusId=document.activeElement&&document.activeElement.id;
+  const typing=focusId==='nt'?document.activeElement.value:null;
+  ({dagskra:renderSchedule,skor:renderScore,stada:renderStandings,upplysingar:renderInfo}[ui.view]||renderSchedule)();
+  document.querySelectorAll('nav.tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.v===ui.view?'page':'false'));
+  if(typing!=null){const t=document.getElementById('nt');if(t){t.value=typing;t.focus();}}
+}
+function route(){const h=location.hash.replace('#','');ui.view=['dagskra','skor','stada','upplysingar'].includes(h)?h:'dagskra';if(ui.view==='skor'&&!ui.hole)ui.hole=1;render();window.scrollTo(0,0);}
+window.addEventListener('hashchange',route);
+ui.hole=firstOpenHole(R[ui.round]);
+route();
+setInterval(()=>{if(ui.view==='dagskra'){const h=document.querySelector('.hero');if(h)h.outerHTML=heroHTML();}},60000);
+connect();
+</script>
+</body>
