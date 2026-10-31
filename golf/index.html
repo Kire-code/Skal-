@@ -66,8 +66,8 @@ h2{font-size:1.5rem;font-weight:800;font-stretch:78%;margin:28px 0 12px}
 
 /* Bottom nav */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
-nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px 12px;text-decoration:none;color:var(--muted);font-size:.8rem;font-weight:600}
+nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px 12px;text-decoration:none;color:var(--muted);font-size:.74rem;font-weight:600}
 nav.tabs a svg{width:22px;height:22px}
 nav.tabs a[aria-current="page"]{color:var(--ink)}
 nav.tabs a[aria-current="page"] svg{color:var(--fairway)}
@@ -172,6 +172,27 @@ table.grid th{font-weight:700;font-stretch:80%;color:var(--muted)}
 .note .del{border:0;background:none;color:var(--muted);font-size:.8rem;text-decoration:underline}
 ul.pts-list{padding-left:18px;margin:6px 0}
 ul.pts-list li{margin:4px 0}
+/* Side games */
+.addbtn{width:100%;border:2px dashed var(--line);background:none;border-radius:14px;padding:14px;font-weight:700;font-size:1.05rem;margin-top:6px}
+.newgame{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
+.newgame input{width:100%;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chips button{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 11px;font-size:.88rem}
+.game{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:12px}
+.game .gh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.game .gn{font-size:1.25rem;font-weight:800;font-stretch:80%}
+.game .tots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.game .tots div{background:var(--soft);border-radius:10px;padding:6px 4px;text-align:center;font-size:.8rem;color:var(--muted)}
+.game .tots b{display:block;font-size:1.4rem;font-weight:800;font-stretch:65%;color:var(--ink);line-height:1.1}
+.game .tots .lead b{color:var(--fairway)}
+.play{border-top:1px solid var(--line);margin-top:12px;padding-top:4px}
+.btn2{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 14px;font-weight:700}
+.row-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+details.hist{margin-top:10px;font-size:.9rem}
+details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4px 0}
+.hrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:.82rem;padding:0}
+.linkbtn.danger{color:var(--over)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -180,8 +201,9 @@ ul.pts-list li{margin:4px 0}
 <nav class="tabs" aria-label="Valmynd"><div class="in">
   <a href="#dagskra" data-v="dagskra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Dagskrá</a>
   <a href="#skor" data-v="skor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 21V3l11 4-11 4"/><ellipse cx="12" cy="21" rx="8" ry="1.5"/></svg>Skor</a>
+  <a href="#leikir" data-v="leikir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>Leikir</a>
   <a href="#stada" data-v="stada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Staðan</a>
-  <a href="#upplysingar" data-v="upplysingar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Upplýsingar</a>
+  <a href="#upplysingar" data-v="upplysingar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</a>
   <a href="https://kire-code.github.io/Skal-/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/><path d="M5 8a2.5 2.5 0 0 1 2-4 3 3 0 0 1 5 0 2.5 2.5 0 0 1 3 4"/></svg>Skál</a>
 </div></nav>
 
@@ -222,10 +244,10 @@ function teeUTC(r){const [y,m,d]=r.date.split('-').map(Number);const [h,mi]=r.ti
 function madridDate(){try{return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Madrid'});}catch(e){return new Date().toISOString().slice(0,10);}}
 
 /* ---------- state ---------- */
-const state={cards:{},courses:{},extras:{},notes:[]};
+const state={cards:{},courses:{},extras:{},notes:[],games:{},plays:{}};
 let db=null, readOnly=false, dbFailed=false, writeError=false;
 const pending={};
-const ui={view:'dagskra',round:defaultRound(),hole:1,author:null};
+const ui={view:'dagskra',round:defaultRound(),hole:1,author:null,newGame:false,draft:null};
 try{ui.author=localStorage.getItem('golf26-author');}catch(e){}
 
 function defaultRound(){
@@ -317,7 +339,7 @@ function teamAward(res,teams,higherBetter,mult){
 }
 
 /* ---------- persistence ---------- */
-function saveLocal(){if(db)return;try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes}));}catch(e){}}
+function saveLocal(){if(db)return;try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes,games:state.games,plays:state.plays}));}catch(e){}}
 function loadLocal(){try{const s=JSON.parse(localStorage.getItem('golf26-state')||'null');if(s){Object.assign(state,s);}}catch(e){}}
 function queueWrite(col,id,data){
   const key=col+'/'+id;
@@ -355,7 +377,7 @@ async function loadAll(){
   const {data,error}=await db.from('golf26').select('col,id,data');
   if(error){dbFailed=true;render();return;}
   dbFailed=false;
-  state.cards={};state.courses={};state.extras={};state.notes=[];
+  state.cards={};state.courses={};state.extras={};state.notes=[];state.games={};state.plays={};
   data.forEach(r=>applyRow(r.col,r.id,r.data,false));
   render();
 }
@@ -493,6 +515,7 @@ function fmtNum(n){return Number.isInteger(n)?String(n):n.toFixed(1).replace('.'
 function leaderboard(){
   const tot=Object.fromEntries(PLAYERS.map(p=>[p.id,{id:p.id,name:p.name,total:0,per:{}}]));
   ROUNDS.forEach(r=>{const res=roundResult(r);for(const k in res.awards){tot[k].total+=res.awards[k];tot[k].per[r.id]=res.awards[k];}});
+  const sp=sidePoints();for(const k in sp){tot[k].total+=sp[k];tot[k].side=sp[k];}
   return Object.values(tot).sort((a,b)=>b.total-a.total);
 }
 function renderStandings(){
@@ -504,8 +527,9 @@ function renderStandings(){
     html+=`<div class="lbrow"><div class="rank">${rank}</div><div><div class="who">${esc(x.name)}</div><div class="bars" aria-hidden="true">${ROUNDS.map(r=>`<i class="${x.per[r.id]!=null?'f':''}" title="${COURSES[r.course]}"></i>`).join('')}</div></div><div class="tot">${fmtNum(x.total)}</div></div>`;});
   html+=`</div><h2>Stig eftir dögum</h2><div class="sc-wrap"><table class="grid"><thead><tr><th>Dagur</th>${PLAYERS.map(p=>`<th>${p.name}</th>`).join('')}</tr></thead><tbody>`;
   ROUNDS.forEach(r=>{const res=roundResult(r);html+=`<tr><td>${dayNum(r)}. ${COURSES[r.course]}<div class="muted small">${FORMATS[r.fmt].name}${r.double?', tvöföld':''}</div></td>${PLAYERS.map(p=>`<td>${res.awards[p.id]!=null?fmtNum(res.awards[p.id]):'–'}</td>`).join('')}</tr>`;});
+  if(Object.keys(state.plays).length){html+=`<tr><td>Aukaleikir<div class="muted small">${Object.keys(state.games).length} leikir</div></td>${PLAYERS.map(p=>{const v=lb.find(x=>x.id===p.id).side||0;return `<td>${fmtNum(v)}</td>`;}).join('')}</tr>`;}
   html+=`</tbody></table></div>`;
-  html+=`<h2>Svona gefast stigin</h2><ul class="pts-list"><li>Einstaklingshringir og skins: 4 stig fyrir 1. sæti, 3 fyrir 2., 2 fyrir 3. og 1 fyrir 4. Jöfn sæti skipta stigunum á milli sín.</li><li>Liðahringir: 3 stig á hvorn í sigurliðinu, 1 á hvorn í hinu, 2 á alla ef jafnt.</li><li>Aukaverðlaun dagsins gefa 1 stig.</li><li>Lokahringurinn á Las Ramblas gefur tvöföld stig.</li></ul>`;
+  html+=`<h2>Svona gefast stigin</h2><ul class="pts-list"><li>Einstaklingshringir og skins: 4 stig fyrir 1. sæti, 3 fyrir 2., 2 fyrir 3. og 1 fyrir 4. Jöfn sæti skipta stigunum á milli sín.</li><li>Liðahringir: 3 stig á hvorn í sigurliðinu, 1 á hvorn í hinu, 2 á alla ef jafnt.</li><li>Aukaverðlaun dagsins gefa 1 stig.</li><li>Lokahringurinn á Las Ramblas gefur tvöföld stig.</li><li>Stig úr aukaleikjum (Leikir-flipinn) bætast beint við.</li></ul>`;
   app.innerHTML=html;
 }
 function renderInfo(){
@@ -536,14 +560,66 @@ function renderInfo(){
   });
 }
 
+/* ---------- side games ---------- */
+const SUGGEST=['Split the G','Fyrsta taskan á bandinu','Fyrstur á barinn','Pílukast','Lengsta teighögg dagsins','Púttkeppni á æfingaflöt'];
+const uid=()=>(crypto.randomUUID?crypto.randomUUID():'g'+Date.now()+Math.random().toString(36).slice(2));
+function sidePoints(){const t={};for(const k in state.plays){const pl=state.plays[k];if(!state.games[pl.game])continue;for(const pid in (pl.scores||{}))if(P[pid])t[pid]=(t[pid]||0)+(Number(pl.scores[pid])||0);}return t;}
+function gameStats(gid){const t=Object.fromEntries(PLAYERS.map(p=>[p.id,0]));const list=[];for(const k in state.plays){const pl=state.plays[k];if(pl.game!==gid)continue;list.push({id:k,...pl});for(const pid in (pl.scores||{}))if(t[pid]!=null)t[pid]+=Number(pl.scores[pid])||0;}list.sort((a,b)=>(b.at||0)-(a.at||0));return {t,list};}
+async function delRow(col,id){delete state[col][id];if(db){const {error}=await db.from('golf26').delete().eq('col',col).eq('id',id);if(error)writeError=true;}else saveLocal();}
+function renderGames(){
+  const games=Object.entries(state.games).map(([id,g])=>({id,...g})).sort((a,b)=>(a.at||0)-(b.at||0));
+  let html=`<h2 style="margin-top:26px">Aukaleikir</h2><p class="muted small" style="margin:-4px 0 8px">Búið til leik, skráið stig og spilið hann eins oft og þið viljið. Stigin bætast við Bikarinn.</p>`;
+  if(writeError) html+=`<div class="banner">Síðasta breyting vistaðist ekki. Athugaðu netsambandið og reyndu aftur.</div>`;
+  if(ui.newGame){
+    html+=`<div class="newgame"><label for="gname" class="small muted">Nafn á leik</label><input id="gname" maxlength="60" placeholder="t.d. Split the G"><div class="chips">${SUGGEST.filter(sg=>!games.some(g=>g.name.toLowerCase()===sg.toLowerCase())).map(sg=>`<button data-sug="${esc(sg)}">${esc(sg)}</button>`).join('')}</div><div class="row-btns"><button class="btn" id="gcreate">Búa til og skrá stig</button><button class="btn2" id="gcancel">Hætta við</button></div></div>`;
+  } else html+=`<button class="addbtn" id="gadd">+ Bæta við leik</button>`;
+  if(!games.length&&!ui.newGame) html+=`<p class="muted" style="margin-top:14px">Engir leikir ennþá. Byrjið á Split the G á fyrsta Guinness-inum.</p>`;
+  games.slice().reverse().forEach(g=>{
+    const {t,list}=gameStats(g.id);const max=Math.max(...Object.values(t));
+    html+=`<div class="game"><div class="gh"><div><div class="gn">${esc(g.name)}</div><div class="muted small">${list.length?`spilaður ${list.length} ${list.length===1?'sinni':'sinnum'}`:'ekki spilaður ennþá'}</div></div></div>`;
+    html+=`<div class="tots">${PLAYERS.map(p=>`<div class="${list.length&&t[p.id]===max&&max>0?'lead':''}"><b>${fmtNum(t[p.id])}</b>${p.name}</div>`).join('')}</div>`;
+    if(ui.draft&&ui.draft.gid===g.id){
+      html+=`<div class="play">${PLAYERS.map(p=>{const v=ui.draft.scores[p.id]||0;return `<div class="prow"><div class="pname">${p.name}</div><div class="step"><button data-gs="${p.id}" data-d="-1" aria-label="Færri stig hjá ${p.name}">−</button><span class="v" style="display:inline-block;line-height:44px">${v}</span><button data-gs="${p.id}" data-d="1" aria-label="Fleiri stig hjá ${p.name}">+</button></div><div class="pts">stig</div></div>`;}).join('')}<div class="row-btns"><button class="btn" id="psave">Vista umferð</button><button class="btn2" id="pcancel">Hætta við</button></div></div>`;
+    } else html+=`<div class="row-btns"><button class="btn" data-play="${g.id}">${list.length?'▶ Spila aftur':'▶ Skrá stig'}</button></div>`;
+    if(list.length||!(ui.draft&&ui.draft.gid===g.id)){
+      html+=`<details class="hist"><summary>Saga${list.length?` (${list.length})`:''}</summary>${list.map(pl=>`<div class="hrow"><span><span class="muted">${new Date(pl.at).toLocaleString('is-IS',{weekday:'short',hour:'2-digit',minute:'2-digit'})}</span> ${PLAYERS.filter(p=>Number(pl.scores?.[p.id])).map(p=>`${p.name} ${fmtNum(Number(pl.scores[p.id]))}`).join(', ')||'engin stig'}</span><button class="linkbtn" data-delplay="${esc(pl.id)}">Eyða</button></div>`).join('')}<div style="margin-top:10px"><button class="linkbtn danger" data-delgame="${g.id}">Eyða leiknum${list.length?' og allri sögu hans':''}</button></div></details>`;
+    }
+    html+=`</div>`;
+  });
+  app.innerHTML=html;
+  const add=app.querySelector('#gadd');if(add)add.onclick=()=>{ui.newGame=true;renderGames();app.querySelector('#gname').focus();};
+  const gc=app.querySelector('#gcancel');if(gc)gc.onclick=()=>{ui.newGame=false;renderGames();};
+  app.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{app.querySelector('#gname').value=b.dataset.sug;});
+  const cr=app.querySelector('#gcreate');if(cr)cr.onclick=()=>{
+    const name=app.querySelector('#gname').value.trim();if(!name){app.querySelector('#gname').focus();return;}
+    const existing=Object.entries(state.games).find(([id,g])=>g.name.toLowerCase()===name.toLowerCase());
+    let id;if(existing){id=existing[0];}else{id=uid();state.games[id]={name:name.slice(0,60),at:Date.now()};queueWrite('games',id,state.games[id]);}
+    ui.newGame=false;ui.draft={gid:id,scores:{}};renderGames();
+  };
+  app.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{ui.draft={gid:b.dataset.play,scores:{}};renderGames();});
+  app.querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>{const v=(ui.draft.scores[b.dataset.gs]||0)+Number(b.dataset.d);ui.draft.scores[b.dataset.gs]=Math.max(-10,Math.min(20,v));renderGames();});
+  const pc=app.querySelector('#pcancel');if(pc)pc.onclick=()=>{ui.draft=null;renderGames();};
+  const ps=app.querySelector('#psave');if(ps)ps.onclick=()=>{
+    const scores={};for(const k in ui.draft.scores)if(ui.draft.scores[k])scores[k]=ui.draft.scores[k];
+    const id=uid();state.plays[id]={game:ui.draft.gid,scores,at:Date.now(),by:ui.author||null};
+    queueWrite('plays',id,state.plays[id]);ui.draft=null;renderGames();
+  };
+  app.querySelectorAll('[data-delplay]').forEach(b=>b.onclick=async()=>{if(!confirm('Eyða þessari umferð?'))return;await delRow('plays',b.dataset.delplay);renderGames();});
+  app.querySelectorAll('[data-delgame]').forEach(b=>b.onclick=async()=>{
+    const g=state.games[b.dataset.delgame];if(!g||!confirm(`Eyða „${g.name}“ og allri sögu hans?`))return;
+    const {list}=gameStats(b.dataset.delgame);for(const pl of list)await delRow('plays',pl.id);
+    await delRow('games',b.dataset.delgame);renderGames();
+  });
+}
+
 function render(){
   const focusId=document.activeElement&&document.activeElement.id;
-  const typing=focusId==='nt'?document.activeElement.value:null;
-  ({dagskra:renderSchedule,skor:renderScore,stada:renderStandings,upplysingar:renderInfo}[ui.view]||renderSchedule)();
+  const typing=(focusId==='nt'||focusId==='gname')?document.activeElement.value:null;
+  ({dagskra:renderSchedule,skor:renderScore,leikir:renderGames,stada:renderStandings,upplysingar:renderInfo}[ui.view]||renderSchedule)();
   document.querySelectorAll('nav.tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.v===ui.view?'page':'false'));
-  if(typing!=null){const t=document.getElementById('nt');if(t){t.value=typing;t.focus();}}
+  if(typing!=null){const t=document.getElementById(focusId);if(t){t.value=typing;t.focus();}}
 }
-function route(){const h=location.hash.replace('#','');ui.view=['dagskra','skor','stada','upplysingar'].includes(h)?h:'dagskra';if(ui.view==='skor'&&!ui.hole)ui.hole=1;render();window.scrollTo(0,0);}
+function route(){const h=location.hash.replace('#','');ui.view=['dagskra','skor','leikir','stada','upplysingar'].includes(h)?h:'dagskra';if(ui.view==='skor'&&!ui.hole)ui.hole=1;render();window.scrollTo(0,0);}
 window.addEventListener('hashchange',route);
 ui.hole=firstOpenHole(R[ui.round]);
 route();
