@@ -1,699 +1,629 @@
 <!doctype html>
-<html lang="en">
+<html lang="is">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Skál: beer reviews</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>">
+<title>Golfferðin – nóvember 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #EDF2EF; --surface: #FFFFFF; --ink: #1C2621; --muted: #5C6962;
-  --line: #D3DDD7; --amber: #D48A0A; --amber-soft: #F5E3BC; --foam: #FFF8E7;
-  --danger: #B3261E;
-  --font: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+:root{
+  --paper:#F7F8F4; --card:#FFFFFF; --soft:#ECF0EA; --ink:#13284A; --muted:#5A6A80; --line:#D6DCE2;
+  --fairway:#2D6B42; --fairway-ink:#FFFFFF; --flag:#F0BF2C; --over:#B6432C; --over2:#7E2A1A;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111714; --surface: #1A221E; --ink: #E8EEEA; --muted: #9AA7A0;
-    --line: #2B3630; --amber: #F0A92A; --amber-soft: #3A2E14; --foam: #F3E6C8;
-    --danger: #FF8A80;
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E192B; --card:#15233A; --soft:#1B2C47; --ink:#E9EEF6; --muted:#9AA9BF; --line:#2A3B57;
+    --fairway:#5DB37A; --fairway-ink:#0E192B; --flag:#F2C94C; --over:#EB7C61; --over2:#FFB3A1;
+    color-scheme: dark;
   }
 }
-*, *::before, *::after { box-sizing: inherit; }
-html { height: 100%; }
-body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
-button, input, select, textarea { font: inherit; color: inherit; }
-:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
-[hidden] { display: none !important; }
-.muted { color: var(--muted); }
-
-.mark { font-weight: 800; font-size: clamp(56px, 13vw, 104px); line-height: .85; letter-spacing: -.045em; margin: 0; font-variation-settings: "opsz" 96; }
-
-.primary { background: var(--ink); color: var(--bg); border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 600; cursor: pointer; }
-.primary:disabled { opacity: .6; cursor: progress; }
-.ghost { background: transparent; border: 1.5px solid var(--line); border-radius: 999px; padding: 10px 18px; font-weight: 600; cursor: pointer; }
-.small { padding: 6px 14px; font-size: 14px; }
-.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
-.link { background: none; border: 0; padding: 4px 0; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-
-label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 14px; }
-label .opt { font-weight: 400; color: var(--muted); }
-input:not([type=file]), select, textarea {
-  display: block; width: 100%; margin-top: 6px; padding: 11px 13px;
-  background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; font-weight: 400; font-size: 16px;
+:root[data-theme="dark"]{
+  --paper:#0E192B; --card:#15233A; --soft:#1B2C47; --ink:#E9EEF6; --muted:#9AA9BF; --line:#2A3B57;
+  --fairway:#5DB37A; --fairway-ink:#0E192B; --flag:#F2C94C; --over:#EB7C61; --over2:#FFB3A1;
+  color-scheme: dark;
 }
-textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.msg { min-height: 1.5em; color: var(--muted); font-size: 14px; margin: 10px 0 0; }
-.msg.err { color: var(--danger); }
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:84px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px}
+.cond{font-stretch:68%}
+h1,h2,h3{margin:0;line-height:1.1}
+h2{font-size:1.5rem;font-weight:800;font-stretch:78%;margin:28px 0 12px}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
 
-.center { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
-.panel { width: min(420px, 100%); }
-.panel .mark { margin-bottom: 14px; }
-.lede { font-size: 19px; color: var(--muted); margin: 0 0 28px; }
-.panel .primary { width: 100%; margin-top: 6px; }
-.panel .link { margin-top: 18px; }
+/* Hero: next tee */
+.hero{padding:26px 0 20px;border-bottom:2px solid var(--ink)}
+.hero .lbl{font-size:.95rem;color:var(--muted);margin-bottom:6px}
+.hero .time{font-size:clamp(5rem,26vw,9.5rem);font-weight:800;font-stretch:62%;line-height:.82;letter-spacing:-.02em;display:flex;align-items:flex-end;gap:14px}
+.hero .pin{width:clamp(28px,8vw,46px);height:clamp(56px,16vw,92px);position:relative;flex:none;margin-bottom:6px}
+.hero .pin::before{content:"";position:absolute;left:0;bottom:0;width:3px;height:100%;background:var(--ink)}
+.hero .pin::after{content:"";position:absolute;left:3px;top:0;width:85%;height:42%;background:var(--flag);clip-path:polygon(0 0,100% 50%,0 100%)}
+.hero .where{font-size:1.6rem;font-weight:700;font-stretch:85%;margin-top:12px}
+.hero .when{color:var(--muted);margin-top:2px}
 
-#app { max-width: 1120px; margin: 0 auto; padding: 28px 20px 120px; }
-.top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
-.me { text-align: right; color: var(--muted); font-size: 14px; }
-.me strong { color: var(--ink); display: block; font-size: 16px; }
-.summary { font-size: clamp(19px, 3vw, 24px); line-height: 1.3; max-width: 32ch; margin: 18px 0 26px; }
-.summary b { color: var(--amber); font-weight: 800; }
-.controls { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; margin-bottom: 22px; }
-.controls input, .controls select { margin: 0; background: var(--surface); }
-.controls select { width: auto; }
-.seg { display: flex; background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px; padding: 3px; }
-.seg button { border: 0; background: none; padding: 7px 14px; border-radius: 999px; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--muted); }
-.seg button[aria-pressed=true] { background: var(--ink); color: var(--bg); }
-@media (max-width: 640px) {
-  .controls { grid-template-columns: 1fr 1fr; }
-  .controls input { grid-column: 1 / -1; }
-  .controls select { width: 100%; }
-}
+/* Schedule */
+.day{display:grid;grid-template-columns:62px 1fr;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);text-align:left;background:none;border-left:0;border-right:0;border-top:0;width:100%}
+.day:hover .course{text-decoration:underline}
+.day .d{text-align:center}
+.day .d .n{font-size:2.6rem;font-weight:800;font-stretch:62%;line-height:.9}
+.day .d .w{font-size:.85rem;color:var(--muted)}
+.day .course{font-size:1.2rem;font-weight:700}
+.day .meta{color:var(--muted);font-size:.9rem;margin-top:2px}
+.fmt{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:600;background:var(--soft)}
+.fmt.real{background:var(--fairway);color:var(--fairway-ink)}
+.fmt.fun{background:var(--flag);color:#1A1A1A}
+.day.past{opacity:.6}
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.card { display: flex; flex-direction: column; text-align: left; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; cursor: pointer; }
-.card:hover { border-color: var(--amber); }
-.ph { aspect-ratio: 4 / 3; background: var(--amber-soft); }
-.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.initial { height: 100%; display: grid; place-items: center; font-size: 88px; font-weight: 800; color: var(--amber); letter-spacing: -.04em; }
-.cb { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-.card h3 { margin: 0; font-size: 20px; line-height: 1.15; font-weight: 800; letter-spacing: -.01em; }
-.brew { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
-.meter { display: flex; align-items: flex-end; gap: 5px; flex: none; font-weight: 800; font-size: 18px; line-height: 1; }
-.meter small { font-weight: 400; color: var(--muted); font-size: 13px; }
-.glass { width: 24px; height: 40px; display: block; }
-.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
-.tags span { background: var(--bg); border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 600; }
-.snip { margin: 0; color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.by { margin: auto 0 0; font-size: 13px; color: var(--muted); padding-top: 4px; }
-.by b { color: var(--ink); font-weight: 600; }
+/* Bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px 12px;text-decoration:none;color:var(--muted);font-size:.74rem;font-weight:600}
+nav.tabs a svg{width:22px;height:22px}
+nav.tabs a[aria-current="page"]{color:var(--ink)}
+nav.tabs a[aria-current="page"] svg{color:var(--fairway)}
 
-.empty { grid-column: 1 / -1; padding: 48px 0; }
-.empty p { font-size: 20px; margin: 0 0 16px; }
+/* Score view */
+.rpick{display:flex;gap:8px;overflow-x:auto;padding:16px 0 6px;scrollbar-width:none}
+.rpick::-webkit-scrollbar{display:none}
+.rpick button{flex:none;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:8px 12px;text-align:left;min-width:92px}
+.rpick button b{display:block;font-stretch:75%;font-size:1.05rem}
+.rpick button span{font-size:.78rem;color:var(--muted)}
+.rpick button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.rpick button[aria-pressed="true"] span{color:inherit;opacity:.75}
+.rhead{padding:10px 0 4px}
+.rhead h1{font-size:1.9rem;font-weight:800;font-stretch:75%}
+.rule{background:var(--soft);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:.93rem}
+.notice{border-left:4px solid var(--flag);background:var(--card);padding:10px 14px;margin:12px 0;font-size:.92rem;border-radius:0 10px 10px 0}
+.banner{background:var(--over);color:#fff;padding:10px 14px;border-radius:10px;margin:12px 0;font-size:.92rem}
 
-.fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--amber); color: #1C1405; border: 0; border-radius: 999px; padding: 16px 24px; font-weight: 800; font-size: 17px; cursor: pointer; box-shadow: 0 6px 20px rgb(120 70 0 / .3); }
+.hole{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:10px}
+.hole .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hole .num{font-size:3.2rem;font-weight:800;font-stretch:62%;line-height:.9}
+.hole .num small{font-size:1rem;font-weight:600;font-stretch:100%;color:var(--muted);display:block}
+.nav-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);font-size:1.4rem;line-height:1}
+.hinfo{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 6px;align-items:center}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:none;padding:6px 12px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.hinfo label{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hinfo select{border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:6px 8px;font-weight:700}
+.prow{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.prow:first-of-type{border-top:0}
+.pname{font-weight:700;font-size:1.05rem}
+.dots{color:var(--fairway);letter-spacing:2px;font-size:.8rem}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);font-size:1.4rem;font-weight:700;line-height:1}
+.step .v{width:46px;height:44px;border:0;background:none;text-align:center;font-size:1.7rem;font-weight:800;font-stretch:70%}
+.step .v.empty{color:var(--muted);font-size:1rem;font-weight:600;font-stretch:100%}
+.pts{min-width:54px;text-align:right;font-weight:700;font-stretch:80%}
+.pts small{display:block;font-weight:500;color:var(--muted);font-size:.75rem;font-stretch:100%}
 
-dialog { border: 0; padding: 0; border-radius: 20px; width: min(580px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); background: var(--surface); color: var(--ink); overflow: auto; }
-dialog::backdrop { background: rgb(0 0 0 / .5); }
-.dlg { padding: 22px 22px 24px; }
-.dlg h2 { margin: 0 0 18px; font-size: 28px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
-.actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
-@media (max-width: 600px) {
-  dialog { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 20px 20px 0 0; max-height: 92dvh; }
-  .dlg { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
-}
+details.hcp{margin:14px 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 14px}
+details.hcp summary{padding:10px 0;font-weight:700;cursor:pointer}
+.hcpgrid{display:grid;grid-template-columns:1fr 90px;gap:8px 12px;align-items:center;padding-bottom:12px}
+.hcpgrid input{width:90px;padding:8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);text-align:center;font-weight:700}
 
-.rating { display: flex; align-items: flex-end; gap: 4px; margin: 8px 0 18px; flex-wrap: wrap; }
-.rbtn { background: none; border: 0; padding: 4px; cursor: pointer; border-radius: 8px; }
-.rbtn .glass { width: 30px; height: 50px; }
-.rlabel { margin-left: 8px; padding-bottom: 8px; font-weight: 600; color: var(--muted); }
+.sc-wrap{overflow-x:auto;margin:14px -18px 0;padding:0 18px}
+table.sc{border-collapse:collapse;font-size:.85rem;min-width:100%}
+table.sc th,table.sc td{border:1px solid var(--line);padding:0;text-align:center;min-width:30px;height:32px}
+table.sc th{background:var(--soft);font-weight:700;font-stretch:80%}
+table.sc td.nm,table.sc th.nm{text-align:left;padding:0 8px;white-space:nowrap;position:sticky;left:0;background:var(--card);z-index:1}
+table.sc th.nm{background:var(--soft)}
+table.sc td.tot{font-weight:800;background:var(--soft)}
+table.sc tr.cur-col td.on, table.sc .on{outline:2px solid var(--ink);outline-offset:-2px}
+table.sc td button{all:unset;display:block;width:100%;height:32px;line-height:32px;cursor:pointer;font-weight:700}
+.sb{display:inline-block;width:24px;height:24px;line-height:22px;border-radius:50%}
+.s-under{border:2px solid var(--fairway);color:var(--fairway)}
+.s-eagle{background:var(--fairway);color:var(--fairway-ink);border-radius:50%}
+.s-bogey{color:var(--over)}
+.s-dbl{color:var(--over2);font-weight:800;text-decoration:underline}
 
-.photo-pick { display: flex; gap: 14px; align-items: center; margin: 6px 0 18px; }
-.photo-pick img { width: 84px; height: 84px; object-fit: cover; border-radius: 12px; }
-.file-btn { position: relative; overflow: hidden; display: inline-block; margin: 0; }
-.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.result{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 16px 12px}
+.result h3{font-size:1.1rem;font-weight:800;margin:12px 0 4px}
+.rrow{display:grid;grid-template-columns:28px 1fr auto auto;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
+.rrow:last-child{border-bottom:0}
+.rrow .pos{font-weight:800;font-stretch:70%;font-size:1.2rem;color:var(--muted)}
+.rrow .val{font-weight:800;font-stretch:75%;font-size:1.2rem}
+.rrow .aw{font-size:.8rem;color:var(--muted);min-width:56px;text-align:right}
+.extra{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:.92rem}
+.extra select{border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:6px 8px}
 
-.d-photo { width: 100%; max-height: 50dvh; object-fit: cover; display: block; }
-.d-title { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -.02em; line-height: 1.05; }
-.d-score { display: flex; align-items: flex-end; gap: 12px; margin: 18px 0; }
-.d-score .glass { width: 36px; height: 60px; }
-.d-score strong { font-size: 30px; line-height: 1; }
-.d-score span { color: var(--muted); display: block; font-size: 15px; }
-.d-also { margin: 0 0 8px; }
-.rev { border-top: 1px solid var(--line); padding: 14px 0; }
-.rev-head { display: flex; gap: 10px; align-items: flex-start; }
-.rev-head .glass { width: 22px; height: 36px; flex: none; }
-.rev-meta { color: var(--muted); font-size: 14px; }
-.rev-text { white-space: pre-wrap; margin: 8px 0 0; font-size: 16px; line-height: 1.55; }
-.rev-photo { display: block; width: 100%; max-height: 280px; object-fit: cover; border-radius: 12px; margin-top: 10px; }
-.rev-actions { display: flex; gap: 8px; margin-top: 10px; }
+/* Leaderboard */
+.lb{margin-top:10px}
+.lbrow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.lbrow .rank{font-size:2.4rem;font-weight:800;font-stretch:62%;line-height:1}
+.lbrow:first-child .rank{color:var(--fairway)}
+.lbrow .who{font-size:1.25rem;font-weight:700}
+.lbrow .tot{font-size:2.4rem;font-weight:800;font-stretch:62%;line-height:1}
+.lbrow .bars{display:flex;gap:3px;margin-top:6px}
+.lbrow .bars i{display:block;width:22px;height:6px;border-radius:2px;background:var(--line)}
+.lbrow .bars i.f{background:var(--fairway)}
+table.grid{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:8px}
+table.grid th,table.grid td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+table.grid th:first-child,table.grid td:first-child{text-align:left}
+table.grid th{font-weight:700;font-stretch:80%;color:var(--muted)}
 
-#toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 12px; font-weight: 600; font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px); z-index: 10; }
-#toast.show { opacity: 1; transform: translate(-50%, 0); }
-#toast.err { background: var(--danger); color: #fff; }
-@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+/* Info */
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.fact b{display:block;font-size:1.8rem;font-weight:800;font-stretch:65%;line-height:1.05}
+.players{display:grid;gap:0}
+.players div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.compose{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.compose textarea{width:100%;min-height:76px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:10px;resize:vertical}
+.who-pick{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.who-pick button{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-weight:600}
+.who-pick button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn{border:0;background:var(--fairway);color:var(--fairway-ink);border-radius:12px;padding:10px 16px;font-weight:700}
+.note{padding:12px 0;border-bottom:1px solid var(--line)}
+.note .h{display:flex;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted)}
+.note .h b{color:var(--ink)}
+.note p{margin:4px 0 0;white-space:pre-wrap}
+.note .del{border:0;background:none;color:var(--muted);font-size:.8rem;text-decoration:underline}
+ul.pts-list{padding-left:18px;margin:6px 0}
+ul.pts-list li{margin:4px 0}
+/* Side games */
+.addbtn{width:100%;border:2px dashed var(--line);background:none;border-radius:14px;padding:14px;font-weight:700;font-size:1.05rem;margin-top:6px}
+.newgame{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
+.newgame input{width:100%;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chips button{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 11px;font-size:.88rem}
+.game{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-top:12px}
+.game .gh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.game .gn{font-size:1.25rem;font-weight:800;font-stretch:80%}
+.game .tots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.game .tots div{background:var(--soft);border-radius:10px;padding:6px 4px;text-align:center;font-size:.8rem;color:var(--muted)}
+.game .tots b{display:block;font-size:1.4rem;font-weight:800;font-stretch:65%;color:var(--ink);line-height:1.1}
+.game .tots .lead b{color:var(--fairway)}
+.play{border-top:1px solid var(--line);margin-top:12px;padding-top:4px}
+.btn2{border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:9px 14px;font-weight:700}
+.row-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+details.hist{margin-top:10px;font-size:.9rem}
+details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4px 0}
+.hrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:.82rem;padding:0}
+.linkbtn.danger{color:var(--over)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<main class="wrap" id="app"></main>
+<nav class="tabs" aria-label="Valmynd"><div class="in">
+  <a href="#dagskra" data-v="dagskra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Dagskrá</a>
+  <a href="#skor" data-v="skor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 21V3l11 4-11 4"/><ellipse cx="12" cy="21" rx="8" ry="1.5"/></svg>Skor</a>
+  <a href="#leikir" data-v="leikir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>Leikir</a>
+  <a href="#stada" data-v="stada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Staðan</a>
+  <a href="#upplysingar" data-v="upplysingar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</a>
+  <a href="https://kire-code.github.io/Skal-/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h10v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M15 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/><path d="M5 8a2.5 2.5 0 0 1 2-4 3 3 0 0 1 5 0 2.5 2.5 0 0 1 3 4"/></svg>Skál</a>
+</div></nav>
 
-<section id="auth" class="center" hidden>
-  <div class="panel">
-    <h1 class="mark">Skál</h1>
-    <p class="lede">Beers we've tried, rated by the crew.</p>
-    <form id="authForm" novalidate>
-      <label id="nameRow" hidden>Your name <span class="opt">(shown on your reviews)</span>
-        <input name="name" autocomplete="nickname" maxlength="40">
-      </label>
-      <label>Email<input name="email" type="email" autocomplete="email" required></label>
-      <label>Password<input name="password" type="password" minlength="6" autocomplete="current-password" required></label>
-      <button class="primary" id="authBtn" type="submit">Sign in</button>
-      <p id="authMsg" class="msg" role="status"></p>
-    </form>
-    <button class="link" id="authToggle" type="button">New here? Create an account</button>
-  </div>
-</section>
-
-<main id="app" hidden>
-  <header class="top">
-    <h1 class="mark">Skál</h1>
-    <div class="me"><strong id="who"></strong><button class="link" id="signOut" type="button">Sign out</button></div>
-  </header>
-  <p id="summary" class="summary"></p>
-  <div class="controls">
-    <input id="q" type="search" placeholder="Search beers, breweries, styles, people" aria-label="Search beers">
-    <div class="seg" role="group" aria-label="Whose beers">
-      <button type="button" data-f="all" aria-pressed="true">Everyone</button>
-      <button type="button" data-f="mine" aria-pressed="false">Mine</button>
-    </div>
-    <select id="sort" aria-label="Sort beers">
-      <option value="new">Latest reviewed</option>
-      <option value="top">Highest rated</option>
-      <option value="name">A to Z</option>
-    </select>
-  </div>
-  <div id="grid" class="grid"></div>
-  <button id="addBtn" class="fab" type="button">Add a beer</button>
-</main>
-
-<dialog id="formDlg" aria-labelledby="formTitle">
-  <form id="form" class="dlg" novalidate>
-    <h2 id="formTitle">Add a beer</h2>
-    <label>Beer name<input name="beer_name" maxlength="120" list="beerList" autocomplete="off" required></label>
-    <div class="row2">
-      <label>Brewery <span class="opt">(optional)</span><input name="brewery" maxlength="120" list="breweryList" autocomplete="off"></label>
-      <label>Style <span class="opt">(optional)</span><input name="beer_style" maxlength="60" list="styleList" autocomplete="off"></label>
-    </div>
-    <div class="row2">
-      <label>ABV % <span class="opt">(optional)</span><input name="abv" inputmode="decimal" placeholder="5.2" maxlength="5" autocomplete="off"></label>
-      <label>When<input name="drunk_on" type="date"></label>
-    </div>
-    <label>Where <span class="opt">(optional)</span><input name="location" maxlength="120" placeholder="Bar, city, or at home" autocomplete="off"></label>
-    <div>
-      <span style="font-weight:600;font-size:14px">Rating</span>
-      <div id="rating" class="rating" role="group" aria-label="Rating out of 5"></div>
-    </div>
-    <label>Review <span class="opt">(optional)</span><textarea name="review" maxlength="4000" placeholder="How did it taste? Would you have it again?"></textarea></label>
-    <span style="font-weight:600;font-size:14px">Photo <span class="opt">(optional)</span></span>
-    <div class="photo-pick">
-      <img id="preview" alt="Selected photo" hidden>
-      <span class="ghost file-btn" id="pickLabel">Choose photo<input id="photo" type="file" accept="image/*" aria-label="Choose photo"></span>
-      <button type="button" class="link" id="removePhoto" hidden>Remove photo</button>
-    </div>
-    <div class="actions">
-      <button type="button" class="ghost" id="cancelBtn">Cancel</button>
-      <button type="submit" class="primary" id="saveBtn">Save review</button>
-    </div>
-  </form>
-</dialog>
-
-<dialog id="detailDlg"><div id="detail"></div></dialog>
-
-<datalist id="beerList"></datalist>
-<datalist id="styleList"></datalist>
-<datalist id="breweryList"></datalist>
-<div id="toast" role="status" aria-live="polite"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-const SUPABASE_URL = 'https://xeqxwpprpcfjluudtsgo.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlcXh3cHBycGNmamx1dWR0c2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzIyMjEsImV4cCI6MjEwNjI0ODIyMX0.7eSJ0xfBQOqwqECAYK5pON9EkQ-YJE64BlHMwzxaplQ';
+/* ====== Supabase: Skal-verkefnið, taflan golf26 ====== */
+const SUPABASE_URL='https://xeqxwpprpcfjluudtsgo.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlcXh3cHBycGNmamx1dWR0c2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzIyMjEsImV4cCI6MjEwNjI0ODIyMX0.7eSJ0xfBQOqwqECAYK5pON9EkQ-YJE64BlHMwzxaplQ';
+/* ======================================================================= */
+const PLAYERS=[
+  {id:'erik',name:'Erik',idx:36.2},
+  {id:'reynir',name:'Reynir',idx:24},
+  {id:'dori',name:'Dóri',idx:13},
+  {id:'nonni',name:'Nonni',idx:36.2}
+];
+const P=Object.fromEntries(PLAYERS.map(p=>[p.id,p]));
+const COURSES={
+  campoamor:'Campoamor', laserena:'La Serena', vistabella:'Vistabella', newsierra:'New Sierra', lasramblas:'Las Ramblas'
+};
+const FORMATS={
+  stableford:{name:'Punktakeppni',kind:'real',rule:'Hver leikur sinn bolta með fullri leikforgjöf. Nettó par gefur 2 punkta, nettó fugl 3, nettó skolli 1. Flestir punktar vinna.'},
+  fourball:{name:'Betri bolti',kind:'fun',rule:'Tveir og tveir saman. Hvor leikur sinn bolta og betri punktafjöldinn á hverri holu gildir fyrir liðið. Leikforgjöf er 85% af fullri.'},
+  scramble:{name:'Texas scramble',kind:'fun',rule:'Báðir í liðinu slá, liðið velur besta boltann og báðir slá aftur þaðan, alla leið ofan í. Eitt skor á lið. Forgjöf liðs er 35% af lægri leikforgjöf plús 15% af hærri.'},
+  skins:{name:'Skins',kind:'fun',rule:'Hver hola er einn vinningur. Lægsta nettóskorið vinnur holuna, en ef tveir eða fleiri eru jafnir flyst vinningurinn yfir á næstu holu og potturinn stækkar. Gengið í dag, engir bílar.'}
+};
+const ROUNDS=[
+  {id:'r1',date:'2026-11-01',wd:'sun',time:'11:40',course:'campoamor',fmt:'stableford',title:'Upphitun',buggies:'2 golfbílar',price:394,extra:'Næstur holu á par 3'},
+  {id:'r2',date:'2026-11-02',wd:'mán',time:'09:56',course:'campoamor',fmt:'fourball',title:'Liðakeppni',teams:[['erik','dori'],['reynir','nonni']],buggies:'2 golfbílar',price:394,extra:'Lengsta teighögg á braut'},
+  {id:'r3',date:'2026-11-03',wd:'þri',time:'10:06',course:'laserena',fmt:'scramble',title:'Scramble-dagurinn',teams:[['erik','reynir'],['dori','nonni']],buggies:'2 golfbílar',price:344,extra:'Lengsta pútt sem fer ofan í'},
+  {id:'r4',date:'2026-11-04',wd:'mið',time:'10:20',course:'vistabella',fmt:'stableford',title:'Alvöru golf',buggies:'2 golfbílar',price:514,extra:'Næstur holu á par 3'},
+  {id:'r5',date:'2026-11-05',wd:'fim',time:'13:10',course:'newsierra',fmt:'skins',title:'Gönguhringurinn',buggies:'Engir bílar, gengið',price:200,extra:'Besta högg úr glompu'},
+  {id:'r6',date:'2026-11-06',wd:'fös',time:'10:20',course:'lasramblas',fmt:'stableford',title:'Lokahringurinn',double:true,buggies:'2 golfbílar',price:462,extra:'Næstur holu á par 3'}
+];
+const R=Object.fromEntries(ROUNDS.map(r=>[r.id,r]));
+const MONTH='nóv.';
 
-const BUCKET = 'beer-photos';
-const LABELS = ['', 'Drain pour', 'Meh', 'Decent', 'Really good', 'Outstanding'];
-const BASE_STYLES = ['Lager', 'Pilsner', 'Helles', 'Pale Ale', 'IPA', 'NEIPA', 'Double IPA', 'Session IPA', 'Amber Ale', 'Red Ale', 'Brown Ale', 'Porter', 'Stout', 'Imperial Stout', 'Wheat beer', 'Hefeweizen', 'Witbier', 'Saison', 'Sour', 'Gose', 'Fruit beer', 'Belgian Dubbel', 'Belgian Tripel', 'Bock', 'Doppelbock', 'Kölsch', 'Märzen', 'Barleywine', 'Jólabjór', 'Páskabjór', 'Þorrabjór'];
+function teeUTC(r){const [y,m,d]=r.date.split('-').map(Number);const [h,mi]=r.time.split(':').map(Number);return Date.UTC(y,m-1,d,h-1,mi);} // CET = UTC+1 in Nov
+function madridDate(){try{return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Madrid'});}catch(e){return new Date().toISOString().slice(0,10);}}
 
-const $ = s => document.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const keyOf = name => String(name || '').trim().toLowerCase();
+/* ---------- state ---------- */
+const state={cards:{},courses:{},extras:{},notes:[],games:{},plays:{}};
+let db=null, readOnly=false, dbFailed=false, writeError=false;
+const pending={};
+const ui={view:'dagskra',round:defaultRound(),hole:1,author:null,newGame:false,draft:null};
+try{ui.author=localStorage.getItem('golf26-author');}catch(e){}
 
-let sb = null;
-const state = { user: null, reviews: [], beers: [], filter: 'all', sort: 'new', q: '', editing: null, rating: 0, photoFile: null, removePhoto: false, authMode: 'in', openKey: null };
-
-function show(view) { for (const id of ['auth', 'app']) $('#' + id).hidden = id !== view; }
-
-let toastTimer;
-function toast(text, isErr = false) {
-  const t = $('#toast');
-  t.textContent = text;
-  t.className = 'show' + (isErr ? ' err' : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = ''; }, isErr ? 5000 : 2500);
+function defaultRound(){
+  const today=madridDate();
+  const r=ROUNDS.find(r=>r.date>=today);
+  return r?r.id:'r6';
 }
-
-function todayISO() {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 10);
+function entities(r){
+  if(r.fmt==='scramble') return r.teams.map((t,i)=>({id:'t'+i,name:t.map(id=>P[id].name).join(' & '),members:t}));
+  return PLAYERS.map(p=>({id:p.id,name:p.name,members:[p.id]}));
 }
-function fmtDate(iso) {
-  if (!iso) return '';
-  return new Date(iso.length === 10 ? iso + 'T12:00:00' : iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+function defaultPh(r,e){
+  if(r.fmt==='scramble'){const h=e.members.map(id=>Math.round(P[id].idx));return Math.round(0.35*Math.min(...h)+0.15*Math.max(...h));}
+  const full=Math.round(P[e.id].idx);
+  return r.fmt==='fourball'?Math.round(full*0.85):full;
 }
-function fmtAbv(n) { return Number(n).toLocaleString('is-IS', { maximumFractionDigits: 1 }) + '%'; }
-function fmtAvg(n) { return n.toLocaleString('en-GB', { maximumFractionDigits: 1 }); }
-function photoUrl(path) { return path ? sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl : ''; }
-function isMine(r) { return r.user_id === state.user?.id; }
-function whoName(r) { return isMine(r) ? 'You' : (r.profiles?.display_name || 'Someone'); }
-function myReview(b) { return b.reviews.find(isMine); }
-function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
-
-// A pint glass filled to level/5 (fractions allowed)
-let glassId = 0;
-function glassSvg(level) {
-  const id = 'gc' + (++glassId);
-  const top = 4, bottom = 57;
-  const y = bottom - (bottom - top) * (level / 5);
-  const shape = 'M4 3h28l-3.5 54h-21z';
-  return `<svg class="glass" viewBox="0 0 36 60" aria-hidden="true">
-    <defs><clipPath id="${id}"><path d="${shape}"/></clipPath></defs>
-    <g clip-path="url(#${id})">
-      <rect x="0" y="${y}" width="36" height="60" style="fill:var(--amber)"/>
-      ${level > 0 ? `<rect x="0" y="${y - 4}" width="36" height="5" style="fill:var(--foam)"/>` : ''}
-    </g>
-    <path d="${shape}" style="fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linejoin:round"/>
-  </svg>`;
+function card(r,e){
+  const c=state.cards[r.id+'_'+e.id];
+  return {strokes:(c&&Array.isArray(c.strokes)?c.strokes:Array(18).fill(null)).map(v=>v==null?null:Number(v)),ph:(c&&c.ph!=null)?Number(c.ph):defaultPh(r,e)};
 }
-
-// ─── Auth ───
-function setAuthMode(mode) {
-  state.authMode = mode;
-  const up = mode === 'up';
-  $('#nameRow').hidden = !up;
-  $('#authBtn').textContent = up ? 'Create account' : 'Sign in';
-  $('#authToggle').textContent = up ? 'Already have an account? Sign in' : 'New here? Create an account';
-  $('#authForm').elements.password.autocomplete = up ? 'new-password' : 'current-password';
-  authMsg('');
+function course(id){
+  const c=state.courses[id];
+  if(c&&Array.isArray(c.par)&&Array.isArray(c.si)) return {par:c.par.map(Number),si:c.si.map(Number),ok:!!c.ok};
+  return {par:Array(18).fill(4),si:Array.from({length:18},(_,i)=>i+1),ok:false};
 }
-function authMsg(text, isErr = false) { const m = $('#authMsg'); m.textContent = text; m.className = 'msg' + (isErr ? ' err' : ''); }
+function rec(ph,si){if(ph<0)return 0;return Math.floor(ph/18)+((ph%18)>=si?1:0);}
+function stb(g,par,r){return g==null?null:Math.max(0,par+r-g+2);}
 
-async function authSubmit(e) {
-  e.preventDefault();
-  const f = $('#authForm');
-  const email = f.elements.email.value.trim();
-  const password = f.elements.password.value;
-  const name = f.elements.name.value.trim();
-  if (!email || !email.includes('@')) return authMsg('Enter your email address.', true);
-  if (password.length < 6) return authMsg('Password needs at least 6 characters.', true);
-  if (state.authMode === 'up' && !name) return authMsg('Add your name so friends know who wrote the review.', true);
-
-  const btn = $('#authBtn');
-  btn.disabled = true;
-  try {
-    if (state.authMode === 'up') {
-      const { data, error } = await sb.auth.signUp({
-        email, password,
-        options: { data: { display_name: name }, emailRedirectTo: location.href.split('#')[0].split('?')[0] }
-      });
-      if (error) throw error;
-      if (!data.session) {
-        setAuthMode('in');
-        authMsg('Check your inbox and tap the confirmation link, then sign in here.');
-      }
-    } else {
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) throw new Error(error.message === 'Invalid login credentials' ? 'Email or password is wrong.' : error.message);
+/* ---------- scoring ---------- */
+function rankAward(list,higherBetter){
+  // list: [{id,v}] -> {id:points} using 4/3/2/1 split on ties
+  const pts=[4,3,2,1];const out={};
+  const s=[...list].sort((a,b)=>higherBetter?b.v-a.v:a.v-b.v);
+  let i=0;
+  while(i<s.length){let j=i;while(j+1<s.length&&s[j+1].v===s[i].v)j++;
+    let sum=0;for(let k=i;k<=j;k++)sum+=pts[k]||0;const each=sum/(j-i+1);
+    for(let k=i;k<=j;k++)out[s[k].id]=each;i=j+1;}
+  return out;
+}
+function roundResult(r){
+  const c=course(r.course), ents=entities(r);
+  const res={rows:[],awards:{},started:false,complete:false,unit:''};
+  const cards=Object.fromEntries(ents.map(e=>[e.id,card(r,e)]));
+  const anyEntered=ents.some(e=>cards[e.id].strokes.some(v=>v!=null));
+  res.started=anyEntered;
+  res.complete=ents.every(e=>cards[e.id].strokes.every(v=>v!=null));
+  const mult=r.double?2:1;
+  if(r.fmt==='stableford'){
+    res.unit='punktar';
+    ents.forEach(e=>{const cd=cards[e.id];let t=0,n=0,g=0;cd.strokes.forEach((s,h)=>{if(s!=null){t+=stb(s,c.par[h],rec(cd.ph,c.si[h]));n++;g+=s;}});res.rows.push({id:e.id,name:e.name,v:t,sub:n?`${n} holur, ${g} högg`:'ekki byrjaður'});});
+    if(anyEntered){const a=rankAward(res.rows,true);for(const k in a)res.awards[k]=a[k]*mult;}
+    res.rows.sort((a,b)=>b.v-a.v);
+  }
+  if(r.fmt==='fourball'){
+    res.unit='punktar';
+    const teams=r.teams.map((t,i)=>{let tot=0,n=0;for(let h=0;h<18;h++){const vals=t.map(id=>{const cd=cards[id];const s=cd.strokes[h];return s==null?null:stb(s,c.par[h],rec(cd.ph,c.si[h]));}).filter(v=>v!=null);if(vals.length){tot+=Math.max(...vals);n++;}}return {id:'t'+i,name:t.map(id=>P[id].name).join(' & '),v:tot,sub:n?`${n} holur`:'ekki byrjaðir',members:t};});
+    res.rows=teams.sort((a,b)=>b.v-a.v);
+    if(anyEntered) teamAward(res,teams,true,mult);
+  }
+  if(r.fmt==='scramble'){
+    res.unit='nettó';
+    const teams=ents.map(e=>{const cd=cards[e.id];let rel=0,n=0,g=0;cd.strokes.forEach((s,h)=>{if(s!=null){rel+=s-rec(cd.ph,c.si[h])-c.par[h];n++;g+=s;}});return {id:e.id,name:e.name,v:rel,disp:n?(rel===0?'E':(rel>0?'+'+rel:String(rel))):'–',sub:n?`${n} holur, ${g} högg brúttó`:'ekki byrjaðir',members:e.members,n};});
+    res.rows=[...teams].sort((a,b)=>(b.n?1:0)-(a.n?1:0)||a.v-b.v);
+    if(anyEntered) teamAward(res,teams,false,mult);
+  }
+  if(r.fmt==='skins'){
+    res.unit='skins';
+    const won=Object.fromEntries(ents.map(e=>[e.id,0]));let carry=0;const holes=[];
+    for(let h=0;h<18;h++){
+      const nets=ents.map(e=>{const cd=cards[e.id];const s=cd.strokes[h];return s==null?null:{id:e.id,n:s-rec(cd.ph,c.si[h])};});
+      if(nets.some(x=>x==null)){holes.push(null);continue;}
+      const m=Math.min(...nets.map(x=>x.n));const w=nets.filter(x=>x.n===m);
+      carry+=1;
+      if(w.length===1){won[w[0].id]+=carry;holes.push({w:w[0].id,v:carry});carry=0;}else holes.push({w:null,v:0});
     }
-  } catch (err) {
-    authMsg(err.message || String(err), true);
-  } finally {
-    btn.disabled = false;
+    res.carry=carry;res.holes=holes;
+    res.rows=ents.map(e=>({id:e.id,name:e.name,v:won[e.id],sub:''})).sort((a,b)=>b.v-a.v);
+    if(holes.some(x=>x)){const a=rankAward(res.rows,true);for(const k in a)res.awards[k]=a[k]*mult;}
   }
+  const ex=state.extras[r.id];
+  if(ex&&ex.winner&&P[ex.winner]) res.awards[ex.winner]=(res.awards[ex.winner]||0)+1;
+  return res;
+}
+function teamAward(res,teams,higherBetter,mult){
+  const [a,b]=teams;let wa=2,wb=2;
+  if(a.v!==b.v){const aWins=higherBetter?a.v>b.v:a.v<b.v;wa=aWins?3:1;wb=aWins?1:3;}
+  a.members.forEach(id=>res.awards[id]=wa*mult);b.members.forEach(id=>res.awards[id]=wb*mult);
+  a.aw=wa*mult;b.aw=wb*mult;
 }
 
-async function onSession(session) {
-  state.user = session?.user || null;
-  if (!state.user) { show('auth'); return; }
-  show('app');
-  $('#who').textContent = state.user.user_metadata?.display_name || state.user.email;
-  await loadReviews();
+/* ---------- persistence ---------- */
+function saveLocal(){if(db)return;try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes,games:state.games,plays:state.plays}));}catch(e){}}
+function loadLocal(){try{const s=JSON.parse(localStorage.getItem('golf26-state')||'null');if(s){Object.assign(state,s);}}catch(e){}}
+function queueWrite(col,id,data){
+  const key=col+'/'+id;
+  if(!db){saveLocal();return;}
+  clearTimeout(pending[key]?.t);
+  pending[key]={t:setTimeout(async()=>{
+    const {error}=await db.from('golf26').upsert({col,id,data,updated_at:new Date().toISOString()});
+    delete pending[key];
+    if(error){writeError=true;render();}
+  },500),data};
+}
+function setStroke(r,e,h,val){
+  const c=card(r,e);c.strokes[h]=val;
+  state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph:c.ph};
+  queueWrite('cards',r.id+'_'+e.id,state.cards[r.id+'_'+e.id]);
+}
+function setPh(r,e,ph){
+  const c=card(r,e);c.ph=ph;state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph};
+  queueWrite('cards',r.id+'_'+e.id,state.cards[r.id+'_'+e.id]);
+}
+function setCourse(id,patch){
+  const c=course(id);const n={par:c.par,si:c.si,ok:true,...patch};state.courses[id]=n;queueWrite('courses',id,n);
 }
 
-// ─── Data ───
-async function loadReviews() {
-  const { data, error } = await sb.from('reviews')
-    .select('*, profiles(display_name)')
-    .order('created_at', { ascending: false });
-  if (error) { toast('Couldn\'t load reviews: ' + error.message, true); return; }
-  state.reviews = data || [];
-  buildBeers();
-  fillDatalists();
-  render();
-}
-
-// Group reviews into one entry per beer (matched by name, ignoring case)
-function buildBeers() {
-  const map = new Map();
-  for (const r of state.reviews) {
-    const k = keyOf(r.beer_name);
-    let b = map.get(k);
-    if (!b) {
-      b = { key: k, name: r.beer_name.trim(), brewery: null, style: null, abv: null, photo: null, latest: r.created_at, reviews: [] };
-      map.set(k, b);
-    }
-    b.reviews.push(r);
-    if (!b.brewery && r.brewery) b.brewery = r.brewery;
-    if (!b.style && r.style) b.style = r.style;
-    if (b.abv == null && r.abv != null) b.abv = r.abv;
-    if (!b.photo && r.photo_path) b.photo = r.photo_path;
-  }
-  state.beers = [...map.values()].map(b => ({ ...b, avg: b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length }));
-}
-
-function fillDatalists() {
-  const uniq = arr => [...new Set(arr.filter(Boolean).map(s => s.trim()))].sort((a, b) => a.localeCompare(b, 'is'));
-  $('#beerList').innerHTML = uniq(state.beers.map(b => b.name)).map(s => `<option value="${esc(s)}">`).join('');
-  $('#styleList').innerHTML = uniq([...BASE_STYLES, ...state.reviews.map(r => r.style)]).map(s => `<option value="${esc(s)}">`).join('');
-  $('#breweryList').innerHTML = uniq(state.reviews.map(r => r.brewery)).map(s => `<option value="${esc(s)}">`).join('');
-}
-
-function visibleBeers() {
-  const q = state.q.trim().toLowerCase();
-  let list = state.beers.filter(b => state.filter === 'all' || b.reviews.some(isMine));
-  if (q) list = list.filter(b => [b.name, b.brewery, b.style, ...b.reviews.flatMap(r => [r.location, r.review, r.profiles?.display_name])]
-    .some(v => (v || '').toLowerCase().includes(q)));
-  const sorters = {
-    new: (a, b) => b.latest.localeCompare(a.latest),
-    top: (a, b) => b.avg - a.avg || b.reviews.length - a.reviews.length || a.name.localeCompare(b.name, 'is'),
-    name: (a, b) => a.name.localeCompare(b.name, 'is')
-  };
-  return [...list].sort(sorters[state.sort]);
-}
-
-function render() {
-  const list = visibleBeers();
-  if (state.filter === 'all') {
-    $('#summary').innerHTML = state.beers.length
-      ? `The crew has tried <b>${state.beers.length}</b> ${state.beers.length === 1 ? 'beer' : 'beers'} across <b>${state.reviews.length}</b> ${state.reviews.length === 1 ? 'review' : 'reviews'}.`
-      : '';
-  } else {
-    const mine = state.reviews.filter(isMine);
-    const avg = mine.length ? mine.reduce((s, r) => s + r.rating, 0) / mine.length : 0;
-    $('#summary').innerHTML = mine.length
-      ? `You've reviewed <b>${mine.length}</b> ${mine.length === 1 ? 'beer' : 'beers'}, averaging <b>${fmtAvg(avg)}</b> of 5 glasses.`
-      : '';
-  }
-
-  const grid = $('#grid');
-  if (!list.length) {
-    grid.innerHTML = state.q
-      ? `<div class="empty"><p>No beers match “${esc(state.q)}”.</p><button class="ghost" type="button" id="clearSearch">Clear search</button></div>`
-      : `<div class="empty"><p>No reviews yet. Add the first beer you try.</p><button class="primary" type="button" id="emptyAdd">Add a beer</button></div>`;
+function applyRow(col,id,data,deleted){
+  if(col==='notes'){
+    state.notes=state.notes.filter(n=>n.id!==id);
+    if(!deleted&&data)state.notes.push({id,...data});
     return;
   }
-  grid.innerHTML = list.map(card).join('');
+  if(!state[col]||pending[col+'/'+id])return;
+  if(deleted)delete state[col][id];else state[col][id]=data;
 }
-
-function card(b) {
-  const n = b.reviews.length;
-  const ph = b.photo
-    ? `<img src="${esc(photoUrl(b.photo))}" alt="" loading="lazy">`
-    : `<div class="initial">${esc(b.name.charAt(0).toUpperCase())}</div>`;
-  const tags = [b.style, b.abv != null ? fmtAbv(b.abv) : null].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join('');
-  const names = [...new Set(b.reviews.map(whoName))];
-  const namesTxt = names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '');
-  const snip = b.reviews.find(r => r.review)?.review;
-  return `<button type="button" class="card" data-key="${esc(b.key)}" aria-label="${esc(b.name)}, average ${fmtAvg(b.avg)} of 5 from ${plural(n, 'review')}">
-    <div class="ph">${ph}</div>
-    <div class="cb">
-      <div class="head">
-        <div><h3>${esc(b.name)}</h3>${b.brewery ? `<p class="brew">${esc(b.brewery)}</p>` : ''}</div>
-        <div class="meter">${glassSvg(b.avg)}${fmtAvg(b.avg)}<small>/5</small></div>
-      </div>
-      ${tags ? `<p class="tags">${tags}</p>` : ''}
-      ${snip ? `<p class="snip">${esc(snip)}</p>` : ''}
-      <p class="by"><b>${plural(n, 'review')}</b> · ${esc(namesTxt)}</p>
-    </div>
-  </button>`;
+async function loadAll(){
+  const {data,error}=await db.from('golf26').select('col,id,data');
+  if(error){dbFailed=true;render();return;}
+  dbFailed=false;
+  state.cards={};state.courses={};state.extras={};state.notes=[];state.games={};state.plays={};
+  data.forEach(r=>applyRow(r.col,r.id,r.data,false));
+  render();
 }
-
-// ─── Beer detail: everyone's reviews ───
-function openDetail(key) {
-  const b = state.beers.find(x => x.key === key);
-  if (!b) return;
-  state.openKey = key;
-  const n = b.reviews.length;
-  const tags = [b.style, b.abv != null ? fmtAbv(b.abv) : null].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join('');
-  const reviewsHtml = b.reviews.map(r => {
-    const meta = [r.location, fmtDate(r.drunk_on)].filter(Boolean).join(', ');
-    return `<div class="rev">
-      <div class="rev-head">${glassSvg(r.rating)}<div>
-        <b>${esc(whoName(r))}</b> · ${r.rating}/5 <span class="muted">${LABELS[r.rating]}</span>
-        ${meta ? `<div class="rev-meta">${esc(meta)}</div>` : ''}
-      </div></div>
-      ${r.review ? `<p class="rev-text">${esc(r.review)}</p>` : ''}
-      ${r.photo_path ? `<img class="rev-photo" src="${esc(photoUrl(r.photo_path))}" alt="Photo from ${esc(whoName(r))}" loading="lazy">` : ''}
-      ${isMine(r) ? `<div class="rev-actions"><button type="button" class="ghost small" data-act="edit" data-rid="${r.id}">Edit</button><button type="button" class="ghost small danger" data-act="delete" data-rid="${r.id}">Delete</button></div>` : ''}
-    </div>`;
-  }).join('');
-
-  $('#detail').innerHTML = `
-    ${b.photo ? `<img class="d-photo" src="${esc(photoUrl(b.photo))}" alt="Photo of ${esc(b.name)}">` : ''}
-    <div class="dlg">
-      <h2 class="d-title">${esc(b.name)}</h2>
-      ${b.brewery ? `<p class="brew" style="font-size:17px">${esc(b.brewery)}</p>` : ''}
-      ${tags ? `<p class="tags" style="margin-top:10px">${tags}</p>` : ''}
-      <div class="d-score">${glassSvg(b.avg)}<div><strong>${fmtAvg(b.avg)}/5</strong><span>${plural(n, 'review')}</span></div></div>
-      ${myReview(b) ? '' : `<p class="d-also"><button type="button" class="primary" data-act="also">Review this beer too</button></p>`}
-      ${reviewsHtml}
-      <div class="actions" style="margin-top:14px">
-        <button type="button" class="ghost" data-act="close">Close</button>
-      </div>
-    </div>`;
-  $('#detailDlg').showModal();
-}
-
-async function deleteReview(r) {
-  if (!confirm(`Delete your review of ${r.beer_name}?`)) return;
-  const { error } = await sb.from('reviews').delete().eq('id', r.id);
-  if (error) { toast('Couldn\'t delete: ' + error.message, true); return; }
-  if (r.photo_path) sb.storage.from(BUCKET).remove([r.photo_path]);
-  $('#detailDlg').close();
-  toast('Review deleted.');
-  await loadReviews();
-}
-
-// ─── Add / edit form ───
-function renderRatingInput() {
-  $('#rating').innerHTML = [1, 2, 3, 4, 5].map(n =>
-    `<button type="button" class="rbtn" data-n="${n}" aria-label="${n} of 5, ${LABELS[n]}" aria-pressed="${n === state.rating}">${glassSvg(n <= state.rating ? 5 : 0)}</button>`
-  ).join('') + `<span class="rlabel">${state.rating ? LABELS[state.rating] : 'Tap a glass'}</span>`;
-}
-
-function setPreview(url) {
-  const img = $('#preview');
-  img.hidden = !url;
-  if (url) img.src = url; else img.removeAttribute('src');
-  $('#removePhoto').hidden = !url;
-  $('#pickLabel').firstChild.textContent = url ? 'Change photo' : 'Choose photo';
-}
-
-// r = review to edit; beer = existing beer to add your own review to
-function openForm(r = null, beer = null) {
-  state.editing = r;
-  state.rating = r?.rating || 0;
-  state.photoFile = null;
-  state.removePhoto = false;
-  const f = $('#form');
-  f.reset();
-  const el = f.elements;
-  el.beer_name.value = r?.beer_name || beer?.name || '';
-  el.brewery.value = r?.brewery || beer?.brewery || '';
-  el.beer_style.value = r?.style || beer?.style || '';
-  const abv = r ? r.abv : beer?.abv;
-  el.abv.value = abv != null ? String(abv) : '';
-  el.location.value = r?.location || '';
-  el.drunk_on.value = r?.drunk_on || todayISO();
-  el.review.value = r?.review || '';
-  $('#formTitle').textContent = r ? 'Edit review' : beer ? `Your take on ${beer.name}` : 'Add a beer';
-  $('#saveBtn').textContent = r ? 'Save changes' : 'Save review';
-  setPreview(r?.photo_path ? photoUrl(r.photo_path) : '');
-  renderRatingInput();
-  $('#formDlg').showModal();
-}
-
-// When a known beer name is picked, fill in its details
-function autofillBeer() {
-  if (state.editing) return;
-  const el = $('#form').elements;
-  const b = state.beers.find(x => x.key === keyOf(el.beer_name.value));
-  if (!b) return;
-  if (!el.brewery.value && b.brewery) el.brewery.value = b.brewery;
-  if (!el.beer_style.value && b.style) el.beer_style.value = b.style;
-  if (!el.abv.value && b.abv != null) el.abv.value = String(b.abv);
-}
-
-async function compressPhoto(file) {
-  let bmp;
-  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
-  catch { bmp = await createImageBitmap(file); }
-  const max = 1400;
-  const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(bmp.width * scale);
-  canvas.height = Math.round(bmp.height * scale);
-  canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
-  return new Promise((resolve, reject) =>
-    canvas.toBlob(b => b ? resolve(b) : reject(new Error('That photo couldn\'t be read. Try a JPG or PNG.')), 'image/jpeg', 0.82));
-}
-
-async function saveReview(ev) {
-  ev.preventDefault();
-  const el = $('#form').elements;
-  const val = n => el[n].value.trim();
-  if (!val('beer_name')) { toast('Add the beer name.', true); el.beer_name.focus(); return; }
-  if (!state.rating) { toast('Pick a rating from 1 to 5 glasses.', true); return; }
-  const abvRaw = val('abv').replace(',', '.');
-  const abv = abvRaw === '' ? null : Number(abvRaw);
-  if (abv !== null && (Number.isNaN(abv) || abv < 0 || abv > 70)) { toast('ABV should be a number like 5.2', true); el.abv.focus(); return; }
-
-  const r = state.editing;
-  if (!r) {
-    const existing = state.reviews.find(x => isMine(x) && keyOf(x.beer_name) === keyOf(val('beer_name')));
-    if (existing && !confirm(`You've already reviewed ${existing.beer_name}. Add a second review anyway?`)) return;
-  }
-
-  const btn = $('#saveBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  let uploadedPath = null;
-  try {
-    const oldPath = r?.photo_path || null;
-    let photo_path = oldPath;
-    if (state.photoFile) {
-      const blob = await compressPhoto(state.photoFile);
-      uploadedPath = `${state.user.id}/${crypto.randomUUID()}.jpg`;
-      const { error } = await sb.storage.from(BUCKET).upload(uploadedPath, blob, { contentType: 'image/jpeg' });
-      if (error) { uploadedPath = null; throw error; }
-      photo_path = uploadedPath;
-    } else if (state.removePhoto) {
-      photo_path = null;
-    }
-
-    const row = {
-      beer_name: val('beer_name'),
-      brewery: val('brewery') || null,
-      style: val('beer_style') || null,
-      abv,
-      rating: state.rating,
-      review: val('review') || null,
-      location: val('location') || null,
-      drunk_on: val('drunk_on') || null,
-      photo_path
-    };
-    const { error } = r
-      ? await sb.from('reviews').update(row).eq('id', r.id)
-      : await sb.from('reviews').insert(row);
-    if (error) throw error;
-
-    if (oldPath && oldPath !== photo_path) sb.storage.from(BUCKET).remove([oldPath]);
-    $('#formDlg').close();
-    toast(r ? 'Changes saved.' : 'Review saved.');
-    await loadReviews();
-  } catch (err) {
-    if (uploadedPath) sb.storage.from(BUCKET).remove([uploadedPath]);
-    toast('Couldn\'t save: ' + (err.message || err), true);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = r ? 'Save changes' : 'Save review';
-  }
-}
-
-// ─── Wiring ───
-function closeOnBackdrop(dlg) {
-  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
-}
-
-function wire() {
-  $('#authForm').addEventListener('submit', authSubmit);
-  $('#authToggle').addEventListener('click', () => setAuthMode(state.authMode === 'in' ? 'up' : 'in'));
-  $('#signOut').addEventListener('click', () => sb.auth.signOut());
-
-  $('#q').addEventListener('input', () => { state.q = $('#q').value; render(); });
-  $('#sort').addEventListener('change', () => { state.sort = $('#sort').value; render(); });
-  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
-    state.filter = b.dataset.f;
-    document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+async function connect(){
+  loadLocal();
+  const configured=window.supabase&&!SUPABASE_URL.includes('XXXX');
+  if(!configured){dbFailed=true;render();return;}
+  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  await loadAll();
+  db.channel('golf26').on('postgres_changes',{event:'*',schema:'public',table:'golf26'},payload=>{
+    if(payload.eventType==='DELETE'){const o=payload.old||{};applyRow(o.col,o.id,null,true);}
+    else{const n=payload.new;applyRow(n.col,n.id,n.data,false);}
     render();
-  }));
+  }).subscribe();
+  // símar sofna: sækja allt aftur þegar síðan er opnuð á ný
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadAll();});
+}
 
-  $('#addBtn').addEventListener('click', () => openForm());
-  $('#grid').addEventListener('click', e => {
-    const c = e.target.closest('.card');
-    if (c) return openDetail(c.dataset.key);
-    if (e.target.closest('#emptyAdd')) return openForm();
-    if (e.target.closest('#clearSearch')) { $('#q').value = ''; state.q = ''; render(); }
+/* ---------- rendering ---------- */
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function dayNum(r){return Number(r.date.slice(8));}
+function fmtChip(r){const f=FORMATS[r.fmt];return `<span class="fmt ${f.kind}">${f.name}${r.double?', tvöföld stig':''}</span>`;}
+
+function countdown(ms){
+  const m=Math.round(ms/60000);if(m<60)return `eftir ${m} mín.`;
+  const h=Math.floor(m/60);if(h<24)return `eftir ${h} klst. ${m%60} mín.`;
+  const d=Math.floor(h/24);return `eftir ${d} ${d===1?'dag':'daga'} og ${h%24} klst.`;
+}
+function heroHTML(){
+  const now=Date.now();
+  const next=ROUNDS.find(r=>teeUTC(r)+5*3600e3>now);
+  if(!next){
+    const lb=leaderboard();const w=lb[0];
+    return `<section class="hero"><div class="lbl">Ferðinni er lokið</div><div class="time"><span class="pin" aria-hidden="true"></span>${esc(w.name)}</div><div class="where">vann bikarinn með ${fmtNum(w.total)} stig</div></section>`;
+  }
+  const diff=teeUTC(next)-now;
+  const when=diff>0?countdown(diff):'Í gangi núna';
+  return `<section class="hero"><div class="lbl">Næsti teigur</div><div class="time"><span class="pin" aria-hidden="true"></span><span>${next.time}</span></div><div class="where">${COURSES[next.course]}</div><div class="when">${next.wd}. ${dayNum(next)}. ${MONTH}, ${when}. ${FORMATS[next.fmt].name}.</div></section>`;
+}
+function renderSchedule(){
+  const now=Date.now();
+  const total=ROUNDS.reduce((s,r)=>s+r.price,0);
+  app.innerHTML=heroHTML()+`<h2>Dagskráin</h2>`+ROUNDS.map(r=>{
+    const past=teeUTC(r)+6*3600e3<now;
+    const teams=r.teams?`<div class="meta">${r.teams.map(t=>t.map(id=>P[id].name).join(' & ')).join(' gegn ')}</div>`:'';
+    return `<button class="day ${past?'past':''}" data-go="${r.id}"><div class="d"><div class="n">${dayNum(r)}</div><div class="w">${r.wd}.</div></div><div><div class="course">${COURSES[r.course]}, kl. ${r.time}</div><div class="meta">${esc(r.title)}. ${r.buggies}. ${r.price} € fyrir hópinn.</div>${teams}${fmtChip(r)}</div></button>`;
+  }).join('')+`<p class="muted small" style="margin-top:14px">Vallargjöld samtals ${total.toLocaleString('is-IS')} €, sem gerir ${(total/4).toLocaleString('is-IS')} € á mann. Rástímar eru staðartími á Spáni.</p>`;
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ui.round=b.dataset.go;ui.hole=firstOpenHole(R[ui.round]);location.hash='skor';});
+}
+function firstOpenHole(r){const es=entities(r);for(let h=0;h<18;h++){if(es.some(e=>card(r,e).strokes[h]==null))return h+1;}return 18;}
+
+function scoreClass(g,par,recv){if(g==null)return'';const d=g-recv-par;if(d<=-2)return's-eagle';if(d===-1)return's-under';if(d===1)return's-bogey';if(d>=2)return's-dbl';return'';}
+
+function renderScore(){
+  const r=R[ui.round], c=course(r.course), ents=entities(r), f=FORMATS[r.fmt];
+  const h=ui.hole-1;
+  const res=roundResult(r);
+  let html=`<div class="rpick" role="group" aria-label="Veldu hring">${ROUNDS.map(x=>`<button aria-pressed="${x.id===r.id}" data-r="${x.id}"><b>${dayNum(x)}. ${MONTH}</b><span>${COURSES[x.course]}</span></button>`).join('')}</div>`;
+  html+=`<div class="rhead"><h1>${COURSES[r.course]}</h1><div class="muted">${r.wd}. ${dayNum(r)}. ${MONTH} kl. ${r.time}. ${esc(r.title)}.</div>${fmtChip(r)}</div>`;
+  html+=`<div class="rule">${f.rule}${r.double?' Á lokadeginum gilda tvöföld stig í bikarnum.':''}</div>`;
+  if(writeError) html+=`<div class="banner">Síðasta skor vistaðist ekki. Athugaðu netsambandið og skráðu holuna aftur.</div>`;
+  if(dbFailed) html+=`<div class="notice">Ekki næst samband við sameiginlega skorið, svo skor vistast bara í þessu tæki í bili.</div>`;
+  if(!c.ok) html+=`<div class="notice">Stilltu par og holuforgjöf (HCP) fyrir hverja holu af skorkortinu. Punktar og nettóskor reiknast rétt þegar það er komið, og stillingin gildir fyrir alla.</div>`;
+
+  html+=`<section class="hole" aria-label="Hola ${ui.hole}"><div class="top"><button class="nav-btn" data-hole="-1" aria-label="Fyrri hola">‹</button><div class="num" style="text-align:center"><small>Hola</small>${ui.hole}</div><button class="nav-btn" data-hole="1" aria-label="Næsta hola">›</button></div>`;
+  html+=`<div class="hinfo"><div class="seg" role="group" aria-label="Par">${[3,4,5].map(p=>`<button data-par="${p}" aria-pressed="${c.par[h]===p}">Par ${p}</button>`).join('')}</div><label>HCP <select data-si>${Array.from({length:18},(_,i)=>`<option ${c.si[h]===i+1?'selected':''}>${i+1}</option>`).join('')}</select></label></div>`;
+  ents.forEach(e=>{
+    const cd=card(r,e), g=cd.strokes[h], rv=rec(cd.ph,c.si[h]);
+    let right='';
+    if(r.fmt==='scramble'||r.fmt==='skins'){right=g==null?'':`${g-rv} <small>nettó</small>`;}
+    else{right=g==null?'':`${stb(g,c.par[h],rv)} <small>punktar</small>`;}
+    html+=`<div class="prow"><div><div class="pname">${esc(e.name)}</div><div class="dots" title="Högg í forgjöf á holu">${'●'.repeat(rv)}<span class="muted small" style="letter-spacing:0">${rv?` ${rv} í forgjöf`:'ekkert högg í forgjöf'}</span></div></div>
+      <div class="step"><button data-st="${e.id}" data-d="-1" aria-label="Færri högg hjá ${esc(e.name)}" ${readOnly?'disabled':''}>−</button><button class="v ${g==null?'empty':''}" data-st="${e.id}" data-d="0" aria-label="Högg hjá ${esc(e.name)}" ${readOnly?'disabled':''}>${g==null?'Skrá':g}</button><button data-st="${e.id}" data-d="1" aria-label="Fleiri högg hjá ${esc(e.name)}" ${readOnly?'disabled':''}>+</button></div>
+      <div class="pts">${right}</div></div>`;
   });
+  html+=`</section>`;
 
-  $('#detail').addEventListener('click', e => {
-    const btn = e.target.closest('[data-act]');
-    if (!btn) return;
-    const act = btn.dataset.act;
-    const r = state.reviews.find(x => x.id === btn.dataset.rid);
-    const b = state.beers.find(x => x.key === state.openKey);
-    if (act === 'close') $('#detailDlg').close();
-    if (act === 'edit' && r) { $('#detailDlg').close(); openForm(r); }
-    if (act === 'delete' && r) deleteReview(r);
-    if (act === 'also' && b) { $('#detailDlg').close(); openForm(null, b); }
+  html+=`<details class="hcp"><summary>Leikforgjöf í þessum hring</summary><div class="hcpgrid">${ents.map(e=>`<label for="ph-${e.id}">${esc(e.name)}${r.fmt==='scramble'?'':` <span class="muted small">(${String(P[e.id].idx).replace('.',',')})</span>`}</label><input id="ph-${e.id}" type="number" inputmode="numeric" min="0" max="60" value="${card(r,e).ph}" data-ph="${e.id}" ${readOnly?'disabled':''}>`).join('')}</div><p class="muted small" style="margin:0 0 12px">Sjálfgefið er reiknað út frá forgjöf. Ef skorkortið eða teigtaflan gefur aðra vallarforgjöf, leiðréttu hér.</p></details>`;
+
+  // scorecard table
+  const cols=[...Array(9).keys()].map(i=>i).concat(['out']).concat([...Array(9).keys()].map(i=>i+9)).concat(['in','tot']);
+  const sumRange=(arr,a,b)=>arr.slice(a,b).reduce((s,v)=>s+(v||0),0);
+  html+=`<div class="sc-wrap"><table class="sc"><thead><tr><th class="nm">Hola</th>${cols.map(k=>typeof k==='number'?`<th class="${k===h?'on':''}">${k+1}</th>`:`<th>${k==='out'?'Út':k==='in'?'Inn':'Alls'}</th>`).join('')}</tr></thead><tbody>`;
+  html+=`<tr><td class="nm muted">Par</td>${cols.map(k=>typeof k==='number'?`<td>${c.par[k]}</td>`:`<td class="tot">${k==='out'?sumRange(c.par,0,9):k==='in'?sumRange(c.par,9,18):sumRange(c.par,0,18)}</td>`).join('')}</tr>`;
+  html+=`<tr><td class="nm muted">HCP</td>${cols.map(k=>typeof k==='number'?`<td class="muted">${c.si[k]}</td>`:`<td class="tot"></td>`).join('')}</tr>`;
+  ents.forEach(e=>{
+    const cd=card(r,e);
+    html+=`<tr><td class="nm"><b>${esc(e.name)}</b></td>${cols.map(k=>{
+      if(typeof k==='number'){const g=cd.strokes[k];return `<td class="${k===h?'on':''}"><button data-jump="${k+1}" aria-label="Hola ${k+1}">${g==null?'':`<span class="sb ${scoreClass(g,c.par[k],rec(cd.ph,c.si[k]))}">${g}</span>`}</button></td>`;}
+      const a=k==='out'?0:k==='in'?9:0,b=k==='out'?9:18;return `<td class="tot">${sumRange(cd.strokes,a,b)||''}</td>`;
+    }).join('')}</tr>`;
+    if(r.fmt==='stableford'||r.fmt==='fourball'){
+      html+=`<tr><td class="nm muted small">punktar</td>${cols.map(k=>{
+        if(typeof k==='number'){const g=cd.strokes[k];return `<td class="muted">${g==null?'':stb(g,c.par[k],rec(cd.ph,c.si[k]))}</td>`;}
+        const a=k==='out'?0:k==='in'?9:0,b=k==='out'?9:18;let s=0;for(let i=a;i<b;i++){const g=cd.strokes[i];if(g!=null)s+=stb(g,c.par[i],rec(cd.ph,c.si[i]));}return `<td class="tot">${s||''}</td>`;
+      }).join('')}</tr>`;
+    }
   });
+  if(r.fmt==='skins'){
+    html+=`<tr><td class="nm muted small">skin</td>${cols.map(k=>{if(typeof k!=='number')return '<td class="tot"></td>';const x=res.holes[k];return `<td class="small">${x?(x.w?esc(P[x.w].name.slice(0,2))+(x.v>1?'×'+x.v:''):'=') :''}</td>`;}).join('')}</tr>`;
+  }
+  html+=`</tbody></table></div>`;
 
-  $('#rating').addEventListener('click', e => {
-    const b = e.target.closest('.rbtn');
-    if (!b) return;
-    state.rating = Number(b.dataset.n);
-    renderRatingInput();
-    $('#rating').querySelector(`[data-n="${state.rating}"]`).focus();
+  // result
+  html+=`<section class="result"><h3>${res.complete?'Úrslit':'Staðan í hringnum'}</h3>`;
+  res.rows.forEach((row,i)=>{
+    const aw=r.fmt==='fourball'||r.fmt==='scramble'?row.aw:res.awards[row.id];
+    const val=row.disp!=null?row.disp:row.v;
+    html+=`<div class="rrow"><div class="pos">${i+1}</div><div><b>${esc(row.name)}</b>${row.sub?`<div class="muted small">${row.sub}</div>`:''}</div><div class="val">${val} <span class="muted small" style="font-weight:500">${res.unit}</span></div><div class="aw">${res.started&&aw!=null?`${fmtNum(aw)} stig${res.complete?'':' (í gangi)'}`:''}</div></div>`;
   });
+  if(r.fmt==='skins'&&res.carry) html+=`<p class="muted small">${res.carry} ${res.carry===1?'skin bíður':'skins bíða'} á næstu holu.</p>`;
+  const ex=state.extras[r.id]||{};
+  html+=`<div class="extra"><label for="ex">Aukaverðlaun, ${esc(r.extra.charAt(0).toLowerCase()+r.extra.slice(1))} (1 stig):</label><select id="ex" ${readOnly?'disabled':''}><option value="">Enginn ennþá</option>${PLAYERS.map(p=>`<option value="${p.id}" ${ex.winner===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div></section>`;
 
-  $('#form').elements.beer_name.addEventListener('input', autofillBeer);
+  app.innerHTML=html;
+  const cur=app.querySelector('.rpick [aria-pressed="true"]');cur&&cur.scrollIntoView({block:'nearest',inline:'center'});
 
-  const photoInput = $('#photo');
-  photoInput.addEventListener('change', () => {
-    const file = photoInput.files && photoInput.files[0];
-    if (!file) return;
-    state.photoFile = file;
-    state.removePhoto = false;
-    setPreview(URL.createObjectURL(file));
-    photoInput.value = '';
+  app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ui.round=b.dataset.r;ui.hole=firstOpenHole(R[ui.round]);render();});
+  app.querySelectorAll('[data-hole]').forEach(b=>b.onclick=()=>{ui.hole=Math.min(18,Math.max(1,ui.hole+Number(b.dataset.hole)));render();});
+  app.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{ui.hole=Number(b.dataset.jump);render();app.querySelector('.hole').scrollIntoView({behavior:'smooth',block:'start'});});
+  app.querySelectorAll('[data-par]').forEach(b=>b.onclick=()=>{if(readOnly)return;const p=course(r.course).par.slice();p[h]=Number(b.dataset.par);setCourse(r.course,{par:p});render();});
+  const si=app.querySelector('[data-si]');si.onchange=()=>{if(readOnly)return;const s=course(r.course).si.slice();s[h]=Number(si.value);setCourse(r.course,{si:s});render();};
+  app.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{
+    const e=ents.find(x=>x.id===b.dataset.st);const g=card(r,e).strokes[h];const d=Number(b.dataset.d);const par=course(r.course).par[h];
+    let v;if(g==null)v=d<0?par-1:(d>0?par+1:par);else if(d===0)return;else v=g+d;
+    if(v<1)v=null;if(v>15)v=15;
+    setStroke(r,e,h,v);render();
   });
-  $('#removePhoto').addEventListener('click', () => {
-    state.photoFile = null;
-    state.removePhoto = true;
-    setPreview('');
-  });
+  app.querySelectorAll('[data-ph]').forEach(inp=>inp.onchange=()=>{const e=ents.find(x=>x.id===inp.dataset.ph);const v=Math.max(0,Math.min(60,Math.round(Number(inp.value)||0)));setPh(r,e,v);render();});
+  const exSel=app.querySelector('#ex');exSel.onchange=()=>{state.extras[r.id]={winner:exSel.value||null};queueWrite('extras',r.id,state.extras[r.id]);render();};
+}
 
-  $('#form').addEventListener('submit', saveReview);
-  $('#cancelBtn').addEventListener('click', () => $('#formDlg').close());
-  closeOnBackdrop($('#formDlg'));
-  closeOnBackdrop($('#detailDlg'));
-
-  // Pick up friends' new reviews when you come back to the tab
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && state.user && !$('#formDlg').open && !$('#detailDlg').open) loadReviews();
+function fmtNum(n){return Number.isInteger(n)?String(n):n.toFixed(1).replace('.',',');}
+function leaderboard(){
+  const tot=Object.fromEntries(PLAYERS.map(p=>[p.id,{id:p.id,name:p.name,total:0,per:{}}]));
+  ROUNDS.forEach(r=>{const res=roundResult(r);for(const k in res.awards){tot[k].total+=res.awards[k];tot[k].per[r.id]=res.awards[k];}});
+  const sp=sidePoints();for(const k in sp){tot[k].total+=sp[k];tot[k].side=sp[k];}
+  return Object.values(tot).sort((a,b)=>b.total-a.total);
+}
+function renderStandings(){
+  const lb=leaderboard();
+  const max=Math.max(1,...lb.map(x=>x.total));
+  let html=`<h2 style="margin-top:26px">Bikarinn</h2><p class="muted small" style="margin:-4px 0 6px">Stig safnast í hverjum hring. Sá sem er efstur eftir Las Ramblas tekur bikarinn heim.</p><div class="lb">`;
+  let lastV=null,lastRank=0;
+  lb.forEach((x,i)=>{const rank=x.total===lastV?lastRank:i+1;lastV=x.total;lastRank=rank;
+    html+=`<div class="lbrow"><div class="rank">${rank}</div><div><div class="who">${esc(x.name)}</div><div class="bars" aria-hidden="true">${ROUNDS.map(r=>`<i class="${x.per[r.id]!=null?'f':''}" title="${COURSES[r.course]}"></i>`).join('')}</div></div><div class="tot">${fmtNum(x.total)}</div></div>`;});
+  html+=`</div><h2>Stig eftir dögum</h2><div class="sc-wrap"><table class="grid"><thead><tr><th>Dagur</th>${PLAYERS.map(p=>`<th>${p.name}</th>`).join('')}</tr></thead><tbody>`;
+  ROUNDS.forEach(r=>{const res=roundResult(r);html+=`<tr><td>${dayNum(r)}. ${COURSES[r.course]}<div class="muted small">${FORMATS[r.fmt].name}${r.double?', tvöföld':''}</div></td>${PLAYERS.map(p=>`<td>${res.awards[p.id]!=null?fmtNum(res.awards[p.id]):'–'}</td>`).join('')}</tr>`;});
+  if(Object.keys(state.plays).length){html+=`<tr><td>Aukaleikir<div class="muted small">${Object.keys(state.games).length} leikir</div></td>${PLAYERS.map(p=>{const v=lb.find(x=>x.id===p.id).side||0;return `<td>${fmtNum(v)}</td>`;}).join('')}</tr>`;}
+  html+=`</tbody></table></div>`;
+  html+=`<h2>Svona gefast stigin</h2><ul class="pts-list"><li>Einstaklingshringir og skins: 4 stig fyrir 1. sæti, 3 fyrir 2., 2 fyrir 3. og 1 fyrir 4. Jöfn sæti skipta stigunum á milli sín.</li><li>Liðahringir: 3 stig á hvorn í sigurliðinu, 1 á hvorn í hinu, 2 á alla ef jafnt.</li><li>Aukaverðlaun dagsins gefa 1 stig.</li><li>Lokahringurinn á Las Ramblas gefur tvöföld stig.</li><li>Stig úr aukaleikjum (Leikir-flipinn) bætast beint við.</li></ul>`;
+  app.innerHTML=html;
+}
+function renderInfo(){
+  const total=ROUNDS.reduce((s,r)=>s+r.price,0);
+  let html=`<h2 style="margin-top:26px">Ferðin í tölum</h2><div class="facts"><div class="fact"><b>6</b>hringir á 5 völlum</div><div class="fact"><b>${(total/4).toLocaleString('is-IS')} €</b>vallargjöld á mann</div><div class="fact"><b>${total.toLocaleString('is-IS')} €</b>samtals fyrir hópinn</div><div class="fact"><b>10</b>golfbílar bókaðir</div></div>`;
+  html+=`<h2>Bjórinn</h2><p>Á 19. holu skráum við bjórana í <a href="https://kire-code.github.io/Skal-/" target="_blank" rel="noopener" style="color:var(--fairway);font-weight:700">Skál</a>. Gefðu einkunn og sjáðu hvað hinir fengu sér.</p>`;
+  html+=`<h2>Kylfingarnir</h2><div class="players">${PLAYERS.map(p=>`<div><b>${p.name}</b><span class="muted">forgjöf ${String(p.idx).replace('.',',')}</span></div>`).join('')}</div>`;
+  html+=`<h2>Tilkynningatafla</h2><div class="compose"><label for="nt" class="small muted">Kvöldmatur, akstur, hver skuldar hverjum bjór…</label><textarea id="nt" placeholder="Skrifa skilaboð" ${readOnly?'disabled':''}></textarea><div class="who-pick" role="group" aria-label="Hver skrifar">${PLAYERS.map(p=>`<button data-au="${p.id}" aria-pressed="${ui.author===p.id}">${p.name}</button>`).join('')}</div><button class="btn" id="post" ${readOnly?'disabled':''}>Setja inn</button></div>`;
+  const notes=[...state.notes].sort((a,b)=>(b.at||0)-(a.at||0));
+  html+=notes.length?notes.map(n=>`<div class="note"><div class="h"><span><b>${esc(P[n.by]?.name||'Einhver')}</b>, ${new Date(n.at).toLocaleString('is-IS',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span><button class="del" data-del="${esc(n.id)}" ${readOnly?'disabled':''}>Eyða</button></div><p>${esc(n.text)}</p></div>`).join(''):`<p class="muted">Engin skilaboð ennþá. Settu inn það fyrsta, til dæmis hvar þið borðið í kvöld.</p>`;
+  app.innerHTML=html;
+  app.querySelectorAll('[data-au]').forEach(b=>b.onclick=()=>{ui.author=b.dataset.au;try{localStorage.setItem('golf26-author',ui.author);}catch(e){}renderInfo();});
+  app.querySelector('#post').onclick=async()=>{
+    const t=app.querySelector('#nt').value.trim();if(!t)return;
+    const by=ui.author||'erik';const n={text:t.slice(0,2000),by,at:Date.now()};
+    const id=(crypto.randomUUID?crypto.randomUUID():'n'+Date.now()+Math.random().toString(36).slice(2));
+    state.notes.push({id,...n});
+    if(db){const {error}=await db.from('golf26').insert({col:'notes',id,data:n});if(error)writeError=true;}
+    else saveLocal();
+    render();
+  };
+  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    const id=b.dataset.del;
+    state.notes=state.notes.filter(n=>n.id!==id);
+    if(db){await db.from('golf26').delete().eq('col','notes').eq('id',id);}
+    else saveLocal();
+    render();
   });
 }
 
-async function init() {
-  if (!window.supabase) { document.body.textContent = 'Skál couldn\'t load. Check your connection and reload.'; return; }
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  wire();
-  const { data: { session } } = await sb.auth.getSession();
-  await onSession(session);
-  sb.auth.onAuthStateChange((_event, s) => {
-    if ((s?.user?.id || null) !== (state.user?.id || null)) setTimeout(() => onSession(s), 0);
+/* ---------- side games ---------- */
+const SUGGEST=['Split the G','Fyrsta taskan á bandinu','Fyrstur á barinn','Pílukast','Lengsta teighögg dagsins','Púttkeppni á æfingaflöt'];
+const uid=()=>(crypto.randomUUID?crypto.randomUUID():'g'+Date.now()+Math.random().toString(36).slice(2));
+function sidePoints(){const t={};for(const k in state.plays){const pl=state.plays[k];if(!state.games[pl.game])continue;for(const pid in (pl.scores||{}))if(P[pid])t[pid]=(t[pid]||0)+(Number(pl.scores[pid])||0);}return t;}
+function gameStats(gid){const t=Object.fromEntries(PLAYERS.map(p=>[p.id,0]));const list=[];for(const k in state.plays){const pl=state.plays[k];if(pl.game!==gid)continue;list.push({id:k,...pl});for(const pid in (pl.scores||{}))if(t[pid]!=null)t[pid]+=Number(pl.scores[pid])||0;}list.sort((a,b)=>(b.at||0)-(a.at||0));return {t,list};}
+async function delRow(col,id){delete state[col][id];if(db){const {error}=await db.from('golf26').delete().eq('col',col).eq('id',id);if(error)writeError=true;}else saveLocal();}
+function renderGames(){
+  const games=Object.entries(state.games).map(([id,g])=>({id,...g})).sort((a,b)=>(a.at||0)-(b.at||0));
+  let html=`<h2 style="margin-top:26px">Aukaleikir</h2><p class="muted small" style="margin:-4px 0 8px">Búið til leik, skráið stig og spilið hann eins oft og þið viljið. Stigin bætast við Bikarinn.</p>`;
+  if(writeError) html+=`<div class="banner">Síðasta breyting vistaðist ekki. Athugaðu netsambandið og reyndu aftur.</div>`;
+  if(ui.newGame){
+    html+=`<div class="newgame"><label for="gname" class="small muted">Nafn á leik</label><input id="gname" maxlength="60" placeholder="t.d. Split the G"><div class="chips">${SUGGEST.filter(sg=>!games.some(g=>g.name.toLowerCase()===sg.toLowerCase())).map(sg=>`<button data-sug="${esc(sg)}">${esc(sg)}</button>`).join('')}</div><div class="row-btns"><button class="btn" id="gcreate">Búa til og skrá stig</button><button class="btn2" id="gcancel">Hætta við</button></div></div>`;
+  } else html+=`<button class="addbtn" id="gadd">+ Bæta við leik</button>`;
+  if(!games.length&&!ui.newGame) html+=`<p class="muted" style="margin-top:14px">Engir leikir ennþá. Byrjið á Split the G á fyrsta Guinness-inum.</p>`;
+  games.slice().reverse().forEach(g=>{
+    const {t,list}=gameStats(g.id);const max=Math.max(...Object.values(t));
+    html+=`<div class="game"><div class="gh"><div><div class="gn">${esc(g.name)}</div><div class="muted small">${list.length?`spilaður ${list.length} ${list.length===1?'sinni':'sinnum'}`:'ekki spilaður ennþá'}</div></div></div>`;
+    html+=`<div class="tots">${PLAYERS.map(p=>`<div class="${list.length&&t[p.id]===max&&max>0?'lead':''}"><b>${fmtNum(t[p.id])}</b>${p.name}</div>`).join('')}</div>`;
+    if(ui.draft&&ui.draft.gid===g.id){
+      html+=`<div class="play">${PLAYERS.map(p=>{const v=ui.draft.scores[p.id]||0;return `<div class="prow"><div class="pname">${p.name}</div><div class="step"><button data-gs="${p.id}" data-d="-1" aria-label="Færri stig hjá ${p.name}">−</button><span class="v" style="display:inline-block;line-height:44px">${v}</span><button data-gs="${p.id}" data-d="1" aria-label="Fleiri stig hjá ${p.name}">+</button></div><div class="pts">stig</div></div>`;}).join('')}<div class="row-btns"><button class="btn" id="psave">Vista umferð</button><button class="btn2" id="pcancel">Hætta við</button></div></div>`;
+    } else html+=`<div class="row-btns"><button class="btn" data-play="${g.id}">${list.length?'▶ Spila aftur':'▶ Skrá stig'}</button></div>`;
+    if(list.length||!(ui.draft&&ui.draft.gid===g.id)){
+      html+=`<details class="hist"><summary>Saga${list.length?` (${list.length})`:''}</summary>${list.map(pl=>`<div class="hrow"><span><span class="muted">${new Date(pl.at).toLocaleString('is-IS',{weekday:'short',hour:'2-digit',minute:'2-digit'})}</span> ${PLAYERS.filter(p=>Number(pl.scores?.[p.id])).map(p=>`${p.name} ${fmtNum(Number(pl.scores[p.id]))}`).join(', ')||'engin stig'}</span><button class="linkbtn" data-delplay="${esc(pl.id)}">Eyða</button></div>`).join('')}<div style="margin-top:10px"><button class="linkbtn danger" data-delgame="${g.id}">Eyða leiknum${list.length?' og allri sögu hans':''}</button></div></details>`;
+    }
+    html+=`</div>`;
+  });
+  app.innerHTML=html;
+  const add=app.querySelector('#gadd');if(add)add.onclick=()=>{ui.newGame=true;renderGames();app.querySelector('#gname').focus();};
+  const gc=app.querySelector('#gcancel');if(gc)gc.onclick=()=>{ui.newGame=false;renderGames();};
+  app.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{app.querySelector('#gname').value=b.dataset.sug;});
+  const cr=app.querySelector('#gcreate');if(cr)cr.onclick=()=>{
+    const name=app.querySelector('#gname').value.trim();if(!name){app.querySelector('#gname').focus();return;}
+    const existing=Object.entries(state.games).find(([id,g])=>g.name.toLowerCase()===name.toLowerCase());
+    let id;if(existing){id=existing[0];}else{id=uid();state.games[id]={name:name.slice(0,60),at:Date.now()};queueWrite('games',id,state.games[id]);}
+    ui.newGame=false;ui.draft={gid:id,scores:{}};renderGames();
+  };
+  app.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{ui.draft={gid:b.dataset.play,scores:{}};renderGames();});
+  app.querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>{const v=(ui.draft.scores[b.dataset.gs]||0)+Number(b.dataset.d);ui.draft.scores[b.dataset.gs]=Math.max(-10,Math.min(20,v));renderGames();});
+  const pc=app.querySelector('#pcancel');if(pc)pc.onclick=()=>{ui.draft=null;renderGames();};
+  const ps=app.querySelector('#psave');if(ps)ps.onclick=()=>{
+    const scores={};for(const k in ui.draft.scores)if(ui.draft.scores[k])scores[k]=ui.draft.scores[k];
+    const id=uid();state.plays[id]={game:ui.draft.gid,scores,at:Date.now(),by:ui.author||null};
+    queueWrite('plays',id,state.plays[id]);ui.draft=null;renderGames();
+  };
+  app.querySelectorAll('[data-delplay]').forEach(b=>b.onclick=async()=>{if(!confirm('Eyða þessari umferð?'))return;await delRow('plays',b.dataset.delplay);renderGames();});
+  app.querySelectorAll('[data-delgame]').forEach(b=>b.onclick=async()=>{
+    const g=state.games[b.dataset.delgame];if(!g||!confirm(`Eyða „${g.name}“ og allri sögu hans?`))return;
+    const {list}=gameStats(b.dataset.delgame);for(const pl of list)await delRow('plays',pl.id);
+    await delRow('games',b.dataset.delgame);renderGames();
   });
 }
 
-init();
+function render(){
+  const focusId=document.activeElement&&document.activeElement.id;
+  const typing=(focusId==='nt'||focusId==='gname')?document.activeElement.value:null;
+  ({dagskra:renderSchedule,skor:renderScore,leikir:renderGames,stada:renderStandings,upplysingar:renderInfo}[ui.view]||renderSchedule)();
+  document.querySelectorAll('nav.tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.v===ui.view?'page':'false'));
+  if(typing!=null){const t=document.getElementById(focusId);if(t){t.value=typing;t.focus();}}
+}
+function route(){const h=location.hash.replace('#','');ui.view=['dagskra','skor','leikir','stada','upplysingar'].includes(h)?h:'dagskra';if(ui.view==='skor'&&!ui.hole)ui.hole=1;render();window.scrollTo(0,0);}
+window.addEventListener('hashchange',route);
+ui.hole=firstOpenHole(R[ui.round]);
+route();
+setInterval(()=>{if(ui.view==='dagskra'){const h=document.querySelector('.hero');if(h)h.outerHTML=heroHTML();}},60000);
+connect();
 </script>
-</blockquote>
 </body>
-</html>
