@@ -206,6 +206,7 @@ details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4
 .avg .st{color:var(--flag);letter-spacing:1px}
 .crank{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
 .crank .st{color:var(--flag)}
+#update-bar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--paper);border:0;border-radius:14px;padding:14px 16px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,.25)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -222,6 +223,8 @@ details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
+/* Útgáfunúmer: hækkað í hvert sinn sem ný útgáfa er sett inn, svo símar uppfæri sig sjálfir */
+const APP_VERSION='2026-11-v6';
 /* ====== Supabase: Skal-verkefnið, taflan golf26 ====== */
 const SUPABASE_URL='https://xeqxwpprpcfjluudtsgo.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlcXh3cHBycGNmamx1dWR0c2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzIyMjEsImV4cCI6MjEwNjI0ODIyMX0.7eSJ0xfBQOqwqECAYK5pON9EkQ-YJE64BlHMwzxaplQ';
@@ -711,5 +714,28 @@ ui.hole=firstOpenHole(R[ui.round]);
 route();
 setInterval(()=>{if(ui.view==='dagskra'){const h=document.querySelector('.hero');if(h)h.outerHTML=heroHTML();}},60000);
 connect();
+
+/* ---------- sjálfvirk uppfærsla ----------
+   Vafrar og GitHub geyma gamla útgáfu í minni. Síðan athugar hvort ný útgáfa sé komin
+   og hleður sér inn aftur. Óvistuð skor eru geymd í símanum og tapast ekki. */
+let updateShown=false;
+async function checkVersion(auto){
+  if(navigator.onLine===false)return;
+  try{
+    const r=await fetch(location.pathname+'?nocache='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return;
+    const m=(await r.text()).match(/const APP_VERSION='([^']+)'/);
+    if(!m||m[1]===APP_VERSION)return;
+    const go=()=>{saveLocal();location.replace(location.pathname+'?v='+encodeURIComponent(m[1])+location.hash);};
+    const busy=['nt','gname','rv'].includes(document.activeElement&&document.activeElement.id);
+    if(auto&&!busy){go();return;}
+    if(updateShown)return;updateShown=true;
+    const b=document.createElement('button');b.id='update-bar';b.textContent='Ný útgáfa af síðunni er komin. Ýttu hér til að uppfæra.';
+    b.onclick=go;document.body.appendChild(b);
+  }catch(e){}
+}
+checkVersion(true);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVersion(false);});
+setInterval(()=>checkVersion(false),5*60*1000);
 </script>
 </body>
