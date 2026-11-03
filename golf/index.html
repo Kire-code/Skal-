@@ -193,6 +193,19 @@ details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4
 .hrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
 .linkbtn{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:.82rem;padding:0}
 .linkbtn.danger{color:var(--over)}
+/* Course reviews */
+.stars{display:flex;gap:2px;margin:6px 0 10px}
+.stars button{border:0;background:none;font-size:2rem;line-height:1;padding:2px 4px;color:var(--line)}
+.stars button[aria-pressed="true"]{color:var(--flag)}
+#rv{width:100%;min-height:70px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:10px;resize:vertical}
+.rev{padding:10px 0;border-top:1px solid var(--line)}
+.rev .h{display:flex;justify-content:space-between;gap:8px;font-size:.9rem}
+.rev .st{color:var(--flag);letter-spacing:1px}
+.rev p{margin:4px 0 0;white-space:pre-wrap}
+.avg{font-size:.95rem;margin-bottom:6px}
+.avg .st{color:var(--flag);letter-spacing:1px}
+.crank{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.crank .st{color:var(--flag)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -244,10 +257,10 @@ function teeUTC(r){const [y,m,d]=r.date.split('-').map(Number);const [h,mi]=r.ti
 function madridDate(){try{return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Madrid'});}catch(e){return new Date().toISOString().slice(0,10);}}
 
 /* ---------- state ---------- */
-const state={cards:{},courses:{},extras:{},notes:[],games:{},plays:{}};
+const state={cards:{},courses:{},extras:{},notes:[],games:{},plays:{},reviews:{}};
 let db=null, readOnly=false, dbFailed=false, writeError=false;
 const pending={};
-const ui={view:'dagskra',round:defaultRound(),hole:1,author:null,newGame:false,draft:null};
+const ui={view:'dagskra',round:defaultRound(),hole:1,author:null,newGame:false,draft:null,rv:null};
 try{ui.author=localStorage.getItem('golf26-author');}catch(e){}
 
 function defaultRound(){
@@ -339,7 +352,7 @@ function teamAward(res,teams,higherBetter,mult){
 }
 
 /* ---------- persistence ---------- */
-function saveLocal(){if(db)return;try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes,games:state.games,plays:state.plays}));}catch(e){}}
+function saveLocal(){if(db)return;try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes,games:state.games,plays:state.plays,reviews:state.reviews}));}catch(e){}}
 function loadLocal(){try{const s=JSON.parse(localStorage.getItem('golf26-state')||'null');if(s){Object.assign(state,s);}}catch(e){}}
 function queueWrite(col,id,data){
   const key=col+'/'+id;
@@ -353,15 +366,15 @@ function queueWrite(col,id,data){
 }
 function setStroke(r,e,h,val){
   const c=card(r,e);c.strokes[h]=val;
-  state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph:c.ph};
+  state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph:c.ph,_t:Date.now()};
   queueWrite('cards',r.id+'_'+e.id,state.cards[r.id+'_'+e.id]);
 }
 function setPh(r,e,ph){
-  const c=card(r,e);c.ph=ph;state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph};
+  const c=card(r,e);c.ph=ph;state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph,_t:Date.now()};
   queueWrite('cards',r.id+'_'+e.id,state.cards[r.id+'_'+e.id]);
 }
 function setCourse(id,patch){
-  const c=course(id);const n={par:c.par,si:c.si,ok:true,...patch};state.courses[id]=n;queueWrite('courses',id,n);
+  const c=course(id);const n={par:c.par,si:c.si,ok:true,...patch,_t:Date.now()};state.courses[id]=n;queueWrite('courses',id,n);
 }
 
 function applyRow(col,id,data,deleted){
@@ -371,13 +384,17 @@ function applyRow(col,id,data,deleted){
     return;
   }
   if(!state[col]||pending[col+'/'+id])return;
+  // aldrei skrifa eldri útgáfu yfir nýrri (hægt net / seinkuð rauntímaskilaboð)
+  const cur=state[col][id];
+  if(!deleted&&cur&&cur._t&&(!data||!data._t||data._t<cur._t))return;
   if(deleted)delete state[col][id];else state[col][id]=data;
 }
 async function loadAll(){
   const {data,error}=await db.from('golf26').select('col,id,data');
   if(error){dbFailed=true;render();return;}
   dbFailed=false;
-  state.cards={};state.courses={};state.extras={};state.notes=[];state.games={};state.plays={};
+  // skor og vellir eru sameinuð, ekki þurrkuð út, svo innsláttur í gangi tapist ekki
+  state.notes=[];state.games={};state.plays={};
   data.forEach(r=>applyRow(r.col,r.id,r.data,false));
   render();
 }
@@ -424,7 +441,7 @@ function renderSchedule(){
   app.innerHTML=heroHTML()+`<h2>Dagskráin</h2>`+ROUNDS.map(r=>{
     const past=teeUTC(r)+6*3600e3<now;
     const teams=r.teams?`<div class="meta">${r.teams.map(t=>t.map(id=>P[id].name).join(' & ')).join(' gegn ')}</div>`:'';
-    return `<button class="day ${past?'past':''}" data-go="${r.id}"><div class="d"><div class="n">${dayNum(r)}</div><div class="w">${r.wd}.</div></div><div><div class="course">${COURSES[r.course]}, kl. ${r.time}</div><div class="meta">${esc(r.title)}. ${r.buggies}. ${r.price} € fyrir hópinn.</div>${teams}${fmtChip(r)}</div></button>`;
+    return `<button class="day ${past?'past':''}" data-go="${r.id}"><div class="d"><div class="n">${dayNum(r)}</div><div class="w">${r.wd}.</div></div><div><div class="course">${COURSES[r.course]}, kl. ${r.time}</div><div class="meta">${esc(r.title)}. ${r.buggies}. ${r.price} € fyrir hópinn.</div>${teams}${avgStars(r.course)?`<div class="meta avg">${avgLine(r.course)}</div>`:''}${fmtChip(r)}</div></button>`;
   }).join('')+`<p class="muted small" style="margin-top:14px">Vallargjöld samtals ${total.toLocaleString('is-IS')} €, sem gerir ${(total/4).toLocaleString('is-IS')} € á mann. Rástímar eru staðartími á Spáni.</p>`;
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ui.round=b.dataset.go;ui.hole=firstOpenHole(R[ui.round]);location.hash='skor';});
 }
@@ -492,8 +509,10 @@ function renderScore(){
   if(r.fmt==='skins'&&res.carry) html+=`<p class="muted small">${res.carry} ${res.carry===1?'skin bíður':'skins bíða'} á næstu holu.</p>`;
   const ex=state.extras[r.id]||{};
   html+=`<div class="extra"><label for="ex">Aukaverðlaun, ${esc(r.extra.charAt(0).toLowerCase()+r.extra.slice(1))} (1 stig):</label><select id="ex" ${readOnly?'disabled':''}><option value="">Enginn ennþá</option>${PLAYERS.map(p=>`<option value="${p.id}" ${ex.winner===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div></section>`;
+  html+=reviewSection(r.course);
 
   app.innerHTML=html;
+  bindReview(r.course,renderScore);
   const cur=app.querySelector('.rpick [aria-pressed="true"]');cur&&cur.scrollIntoView({block:'nearest',inline:'center'});
 
   app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ui.round=b.dataset.r;ui.hole=firstOpenHole(R[ui.round]);render();});
@@ -535,6 +554,8 @@ function renderStandings(){
 function renderInfo(){
   const total=ROUNDS.reduce((s,r)=>s+r.price,0);
   let html=`<h2 style="margin-top:26px">Ferðin í tölum</h2><div class="facts"><div class="fact"><b>6</b>hringir á 5 völlum</div><div class="fact"><b>${(total/4).toLocaleString('is-IS')} €</b>vallargjöld á mann</div><div class="fact"><b>${total.toLocaleString('is-IS')} €</b>samtals fyrir hópinn</div><div class="fact"><b>10</b>golfbílar bókaðir</div></div>`;
+  const ranked=Object.keys(COURSES).map(cid=>({cid,a:avgStars(cid)})).filter(x=>x.a).sort((a,b)=>b.a.avg-a.a.avg);
+  html+=`<h2>Vellirnir okkar</h2>`+(ranked.length?ranked.map((x,i)=>`<div class="crank"><b>${i+1}</b><span><b>${COURSES[x.cid]}</b> <span class="muted small">${x.a.n} ${x.a.n===1?'umsögn':'umsagnir'}</span></span><span><span class="st">★</span> ${x.a.avg.toFixed(1).replace('.',',')}</span></div>`).join(''):`<p class="muted">Engar umsagnir ennþá. Gefið einkunn neðst á Skor-síðunni eftir hvern hring.</p>`);
   html+=`<h2>Bjórinn</h2><p>Á 19. holu skráum við bjórana í <a href="https://kire-code.github.io/Skal-/" target="_blank" rel="noopener" style="color:var(--fairway);font-weight:700">Skál</a>. Gefðu einkunn og sjáðu hvað hinir fengu sér.</p>`;
   html+=`<h2>Kylfingarnir</h2><div class="players">${PLAYERS.map(p=>`<div><b>${p.name}</b><span class="muted">forgjöf ${String(p.idx).replace('.',',')}</span></div>`).join('')}</div>`;
   html+=`<h2>Tilkynningatafla</h2><div class="compose"><label for="nt" class="small muted">Kvöldmatur, akstur, hver skuldar hverjum bjór…</label><textarea id="nt" placeholder="Skrifa skilaboð" ${readOnly?'disabled':''}></textarea><div class="who-pick" role="group" aria-label="Hver skrifar">${PLAYERS.map(p=>`<button data-au="${p.id}" aria-pressed="${ui.author===p.id}">${p.name}</button>`).join('')}</div><button class="btn" id="post" ${readOnly?'disabled':''}>Setja inn</button></div>`;
@@ -558,6 +579,40 @@ function renderInfo(){
     else saveLocal();
     render();
   });
+}
+
+/* ---------- course reviews ---------- */
+function reviewsFor(cid){return Object.entries(state.reviews).filter(([id,r])=>r&&r.course===cid&&P[r.by]).map(([id,r])=>({id,...r})).sort((a,b)=>(b.at||0)-(a.at||0));}
+function avgStars(cid){const l=reviewsFor(cid).filter(r=>r.stars);if(!l.length)return null;return {avg:l.reduce((s,r)=>s+r.stars,0)/l.length,n:l.length};}
+function starStr(n){const k=Math.round(n);return '★'.repeat(k)+'☆'.repeat(5-k);}
+function avgLine(cid){const a=avgStars(cid);return a?`<span class="st">${starStr(a.avg)}</span> ${a.avg.toFixed(1).replace('.',',')} (${a.n} ${a.n===1?'umsögn':'umsagnir'})`:'';}
+function reviewSection(cid){
+  const me=ui.author, mine=me?state.reviews[cid+'_'+me]:null;
+  if(!ui.rv||ui.rv.course!==cid||ui.rv.by!==me) ui.rv={course:cid,by:me,stars:mine?mine.stars:0,text:mine?mine.text||'':''};
+  let h=`<section class="result"><h3>Umsögn um ${COURSES[cid]}</h3>`;
+  const al=avgLine(cid); if(al) h+=`<div class="avg">${al}</div>`;
+  h+=`<div class="who-pick" role="group" aria-label="Hver ert þú">${PLAYERS.map(p=>`<button data-rau="${p.id}" aria-pressed="${me===p.id}">${p.name}</button>`).join('')}</div>`;
+  if(!me) h+=`<p class="muted small">Veldu nafnið þitt til að gefa vellinum einkunn.</p>`;
+  else{
+    h+=`<div class="stars" role="group" aria-label="Einkunn">${[1,2,3,4,5].map(n=>`<button data-star="${n}" aria-pressed="${n<=ui.rv.stars}" aria-label="${n} stjörnur">★</button>`).join('')}</div>`;
+    h+=`<label for="rv" class="small muted">Hvað fannst þér? Flatir, brautir, útsýni, barinn…</label><textarea id="rv" maxlength="1000">${esc(ui.rv.text)}</textarea>`;
+    h+=`<div class="row-btns"><button class="btn" id="rvsave">${mine?'Uppfæra umsögn':'Vista umsögn'}</button>${mine?'<button class="btn2" id="rvdel">Eyða minni</button>':''}</div>`;
+  }
+  const list=reviewsFor(cid);
+  if(list.length) h+=`<div style="margin-top:12px">${list.map(r=>`<div class="rev"><div class="h"><b>${esc(P[r.by].name)}</b><span class="st">${starStr(r.stars||0)}</span></div>${r.text?`<p>${esc(r.text)}</p>`:''}</div>`).join('')}</div>`;
+  return h+`</section>`;
+}
+function bindReview(cid,rerender){
+  app.querySelectorAll('[data-rau]').forEach(b=>b.onclick=()=>{ui.author=b.dataset.rau;try{localStorage.setItem('golf26-author',ui.author);}catch(e){}ui.rv=null;rerender();});
+  app.querySelectorAll('[data-star]').forEach(b=>b.onclick=()=>{ui.rv.stars=Number(b.dataset.star);rerender();});
+  const ta=app.querySelector('#rv');if(ta)ta.oninput=()=>{ui.rv.text=ta.value;};
+  const sv=app.querySelector('#rvsave');if(sv)sv.onclick=()=>{
+    if(!ui.rv.stars){alert('Veldu fjölda stjarna fyrst.');return;}
+    const id=cid+'_'+ui.author;const now=Date.now();
+    state.reviews[id]={course:cid,by:ui.author,stars:ui.rv.stars,text:(ui.rv.text||'').trim().slice(0,1000),at:now,_t:now};
+    queueWrite('reviews',id,state.reviews[id]);ui.rv=null;rerender();
+  };
+  const dl=app.querySelector('#rvdel');if(dl)dl.onclick=async()=>{if(!confirm('Eyða umsögninni þinni?'))return;await delRow('reviews',cid+'_'+ui.author);ui.rv=null;rerender();};
 }
 
 /* ---------- side games ---------- */
@@ -614,7 +669,7 @@ function renderGames(){
 
 function render(){
   const focusId=document.activeElement&&document.activeElement.id;
-  const typing=(focusId==='nt'||focusId==='gname')?document.activeElement.value:null;
+  const typing=(focusId==='nt'||focusId==='gname'||focusId==='rv')?document.activeElement.value:null;
   ({dagskra:renderSchedule,skor:renderScore,leikir:renderGames,stada:renderStandings,upplysingar:renderInfo}[ui.view]||renderSchedule)();
   document.querySelectorAll('nav.tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.v===ui.view?'page':'false'));
   if(typing!=null){const t=document.getElementById(focusId);if(t){t.value=typing;t.focus();}}
