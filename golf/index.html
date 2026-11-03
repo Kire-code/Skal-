@@ -352,18 +352,40 @@ function teamAward(res,teams,higherBetter,mult){
 }
 
 /* ---------- persistence ---------- */
-function saveLocal(){if(db)return;try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes,games:state.games,plays:state.plays,reviews:state.reviews}));}catch(e){}}
-function loadLocal(){try{const s=JSON.parse(localStorage.getItem('golf26-state')||'null');if(s){Object.assign(state,s);}}catch(e){}}
-function queueWrite(col,id,data){
-  const key=col+'/'+id;
-  if(!db){saveLocal();return;}
-  clearTimeout(pending[key]?.t);
-  pending[key]={t:setTimeout(async()=>{
-    const {error}=await db.from('golf26').upsert({col,id,data,updated_at:new Date().toISOString()});
-    delete pending[key];
-    if(error){writeError=true;render();}
-  },500),data};
+/* Allt er geymt í símanum fyrst (localStorage) og sent í gagnagrunninn þegar net er til staðar.
+   Óvistaðar breytingar bíða í "outbox" sem lifir af endurhleðslu og netleysi. */
+const OUTBOX_KEY='golf26-outbox';
+let outbox={};try{outbox=JSON.parse(localStorage.getItem(OUTBOX_KEY)||'{}')||{};}catch(e){outbox={};}
+let flushing=false,flushTimer=null,localLoaded=false;
+function saveLocal(){try{localStorage.setItem('golf26-state',JSON.stringify({cards:state.cards,courses:state.courses,extras:state.extras,notes:state.notes,games:state.games,plays:state.plays,reviews:state.reviews}));localStorage.setItem(OUTBOX_KEY,JSON.stringify(outbox));}catch(e){}}
+function loadLocal(){if(localLoaded)return;localLoaded=true;try{const s=JSON.parse(localStorage.getItem('golf26-state')||'null');if(s){for(const k in s){if(k in state)state[k]=s[k];}}}catch(e){}}
+function unsynced(){return Object.keys(outbox).length;}
+function queueWrite(col,id,data){outbox[col+'/'+id]={col,id,data,op:'upsert'};saveLocal();updateSyncUI();scheduleFlush(400);}
+function queueDelete(col,id){outbox[col+'/'+id]={col,id,op:'delete'};saveLocal();updateSyncUI();scheduleFlush(100);}
+function scheduleFlush(ms){clearTimeout(flushTimer);flushTimer=setTimeout(flush,ms);}
+async function flush(){
+  if(!db||flushing||!unsynced())return;
+  if(navigator.onLine===false){updateSyncUI();return;}
+  flushing=true;
+  try{
+    for(const key of Object.keys(outbox)){
+      const it=outbox[key];let res;
+      try{res=it.op==='delete'?await db.from('golf26').delete().eq('col',it.col).eq('id',it.id):await db.from('golf26').upsert({col:it.col,id:it.id,data:it.data,updated_at:new Date().toISOString()});}catch(e){res={error:e};}
+      if(res&&res.error){writeError=true;break;}
+      if(outbox[key]===it)delete outbox[key];
+      writeError=false;dbFailed=false;
+    }
+  }finally{flushing=false;saveLocal();updateSyncUI();}
+  if(unsynced()&&!writeError)scheduleFlush(300);
 }
+setInterval(()=>{if(unsynced())flush();},15000);
+function syncHTML(){
+  const n=unsynced();
+  if(n) return `<div id="sync" class="notice">⏳ ${n} ${n===1?'breyting bíður':'breytingar bíða'} eftir netsambandi. Þær eru geymdar í símanum og sendast sjálfkrafa um leið og netið kemur.</div>`;
+  if(dbFailed) return `<div id="sync" class="notice">Ekkert netsamband núna. Allt sem þú skráir geymist í símanum og sendist þegar netið kemur aftur.</div>`;
+  return `<div id="sync" class="small muted" style="margin:8px 0">✓ Allt vistað og samstillt</div>`;
+}
+function updateSyncUI(){const el=document.getElementById('sync');if(el)el.outerHTML=syncHTML();}
 function setStroke(r,e,h,val){
   const c=card(r,e);c.strokes[h]=val;
   state.cards[r.id+'_'+e.id]={strokes:c.strokes,ph:c.ph,_t:Date.now()};
@@ -379,39 +401,51 @@ function setCourse(id,patch){
 
 function applyRow(col,id,data,deleted){
   if(col==='notes'){
+    if(outbox['notes/'+id])return;
     state.notes=state.notes.filter(n=>n.id!==id);
     if(!deleted&&data)state.notes.push({id,...data});
     return;
   }
-  if(!state[col]||pending[col+'/'+id])return;
+  if(!state[col]||outbox[col+'/'+id])return;
   // aldrei skrifa eldri útgáfu yfir nýrri (hægt net / seinkuð rauntímaskilaboð)
   const cur=state[col][id];
   if(!deleted&&cur&&cur._t&&(!data||!data._t||data._t<cur._t))return;
   if(deleted)delete state[col][id];else state[col][id]=data;
 }
 async function loadAll(){
-  const {data,error}=await db.from('golf26').select('col,id,data');
-  if(error){dbFailed=true;render();return;}
+  if(!db)return;
+  let res;try{res=await db.from('golf26').select('col,id,data');}catch(e){res={error:e};}
+  if(res.error){dbFailed=true;updateSyncUI();return;}
   dbFailed=false;
-  // skor og vellir eru sameinuð, ekki þurrkuð út, svo innsláttur í gangi tapist ekki
-  state.notes=[];state.games={};state.plays={};
-  data.forEach(r=>applyRow(r.col,r.id,r.data,false));
-  render();
+  const seen=new Set(res.data.map(r=>r.col+'/'+r.id));
+  res.data.forEach(r=>applyRow(r.col,r.id,r.data,false));
+  // fjarlægja það sem aðrir eyddu, en aldrei óvistaðar breytingar úr þessum síma
+  for(const col of ['games','plays','reviews','extras'])for(const id of Object.keys(state[col]))if(!seen.has(col+'/'+id)&&!outbox[col+'/'+id])delete state[col][id];
+  state.notes=state.notes.filter(n=>seen.has('notes/'+n.id)||outbox['notes/'+n.id]);
+  saveLocal();render();flush();
 }
+function loadSupabaseLib(){return new Promise(res=>{if(window.supabase)return res(true);const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';sc.onload=()=>res(true);sc.onerror=()=>res(false);document.head.appendChild(sc);});}
+let connecting=false;
 async function connect(){
-  loadLocal();
-  const configured=window.supabase&&!SUPABASE_URL.includes('XXXX');
-  if(!configured){dbFailed=true;render();return;}
+  loadLocal();render();
+  if(db||connecting)return;
+  if(SUPABASE_URL.includes('XXXX')){dbFailed=true;updateSyncUI();return;}
+  connecting=true;
+  const ok=window.supabase||await loadSupabaseLib();
+  connecting=false;
+  if(!ok){dbFailed=true;updateSyncUI();return;}
   db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
   await loadAll();
   db.channel('golf26').on('postgres_changes',{event:'*',schema:'public',table:'golf26'},payload=>{
     if(payload.eventType==='DELETE'){const o=payload.old||{};applyRow(o.col,o.id,null,true);}
     else{const n=payload.new;applyRow(n.col,n.id,n.data,false);}
-    render();
+    saveLocal();render();
   }).subscribe();
-  // símar sofna: sækja allt aftur þegar síðan er opnuð á ný
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadAll();});
 }
+// símar sofna og missa net: sækja og senda aftur þegar síðan vaknar eða netið kemur
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if(db){flush();loadAll();}else connect();}});
+window.addEventListener('online',()=>{writeError=false;if(db){flush();loadAll();}else connect();});
+window.addEventListener('offline',()=>{dbFailed=true;updateSyncUI();});
 
 /* ---------- rendering ---------- */
 const app=document.getElementById('app');
@@ -456,8 +490,7 @@ function renderScore(){
   let html=`<div class="rpick" role="group" aria-label="Veldu hring">${ROUNDS.map(x=>`<button aria-pressed="${x.id===r.id}" data-r="${x.id}"><b>${dayNum(x)}. ${MONTH}</b><span>${COURSES[x.course]}</span></button>`).join('')}</div>`;
   html+=`<div class="rhead"><h1>${COURSES[r.course]}</h1><div class="muted">${r.wd}. ${dayNum(r)}. ${MONTH} kl. ${r.time}. ${esc(r.title)}.</div>${fmtChip(r)}</div>`;
   html+=`<div class="rule">${f.rule}${r.double?' Á lokadeginum gilda tvöföld stig í bikarnum.':''}</div>`;
-  if(writeError) html+=`<div class="banner">Síðasta skor vistaðist ekki. Athugaðu netsambandið og skráðu holuna aftur.</div>`;
-  if(dbFailed) html+=`<div class="notice">Ekki næst samband við sameiginlega skorið, svo skor vistast bara í þessu tæki í bili.</div>`;
+  html+=syncHTML();
   if(!c.ok) html+=`<div class="notice">Stilltu par og holuforgjöf (HCP) fyrir hverja holu af skorkortinu. Punktar og nettóskor reiknast rétt þegar það er komið, og stillingin gildir fyrir alla.</div>`;
 
   html+=`<section class="hole" aria-label="Hola ${ui.hole}"><div class="top"><button class="nav-btn" data-hole="-1" aria-label="Fyrri hola">‹</button><div class="num" style="text-align:center"><small>Hola</small>${ui.hole}</div><button class="nav-btn" data-hole="1" aria-label="Næsta hola">›</button></div>`;
@@ -568,15 +601,12 @@ function renderInfo(){
     const by=ui.author||'erik';const n={text:t.slice(0,2000),by,at:Date.now()};
     const id=(crypto.randomUUID?crypto.randomUUID():'n'+Date.now()+Math.random().toString(36).slice(2));
     state.notes.push({id,...n});
-    if(db){const {error}=await db.from('golf26').insert({col:'notes',id,data:n});if(error)writeError=true;}
-    else saveLocal();
+    queueWrite('notes',id,n);
     render();
   };
   app.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
     const id=b.dataset.del;
-    state.notes=state.notes.filter(n=>n.id!==id);
-    if(db){await db.from('golf26').delete().eq('col','notes').eq('id',id);}
-    else saveLocal();
+    await delRow('notes',id);
     render();
   });
 }
@@ -620,11 +650,11 @@ const SUGGEST=['Split the G','Fyrsta taskan á bandinu','Fyrstur á barinn','Pí
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():'g'+Date.now()+Math.random().toString(36).slice(2));
 function sidePoints(){const t={};for(const k in state.plays){const pl=state.plays[k];if(!state.games[pl.game])continue;for(const pid in (pl.scores||{}))if(P[pid])t[pid]=(t[pid]||0)+(Number(pl.scores[pid])||0);}return t;}
 function gameStats(gid){const t=Object.fromEntries(PLAYERS.map(p=>[p.id,0]));const list=[];for(const k in state.plays){const pl=state.plays[k];if(pl.game!==gid)continue;list.push({id:k,...pl});for(const pid in (pl.scores||{}))if(t[pid]!=null)t[pid]+=Number(pl.scores[pid])||0;}list.sort((a,b)=>(b.at||0)-(a.at||0));return {t,list};}
-async function delRow(col,id){delete state[col][id];if(db){const {error}=await db.from('golf26').delete().eq('col',col).eq('id',id);if(error)writeError=true;}else saveLocal();}
+async function delRow(col,id){if(col==='notes')state.notes=state.notes.filter(n=>n.id!==id);else delete state[col][id];queueDelete(col,id);}
 function renderGames(){
   const games=Object.entries(state.games).map(([id,g])=>({id,...g})).sort((a,b)=>(a.at||0)-(b.at||0));
   let html=`<h2 style="margin-top:26px">Aukaleikir</h2><p class="muted small" style="margin:-4px 0 8px">Búið til leik, skráið stig og spilið hann eins oft og þið viljið. Stigin bætast við Bikarinn.</p>`;
-  if(writeError) html+=`<div class="banner">Síðasta breyting vistaðist ekki. Athugaðu netsambandið og reyndu aftur.</div>`;
+  html+=syncHTML();
   if(ui.newGame){
     html+=`<div class="newgame"><label for="gname" class="small muted">Nafn á leik</label><input id="gname" maxlength="60" placeholder="t.d. Split the G"><div class="chips">${SUGGEST.filter(sg=>!games.some(g=>g.name.toLowerCase()===sg.toLowerCase())).map(sg=>`<button data-sug="${esc(sg)}">${esc(sg)}</button>`).join('')}</div><div class="row-btns"><button class="btn" id="gcreate">Búa til og skrá stig</button><button class="btn2" id="gcancel">Hætta við</button></div></div>`;
   } else html+=`<button class="addbtn" id="gadd">+ Bæta við leik</button>`;
@@ -676,6 +706,7 @@ function render(){
 }
 function route(){const h=location.hash.replace('#','');ui.view=['dagskra','skor','leikir','stada','upplysingar'].includes(h)?h:'dagskra';if(ui.view==='skor'&&!ui.hole)ui.hole=1;render();window.scrollTo(0,0);}
 window.addEventListener('hashchange',route);
+loadLocal();
 ui.hole=firstOpenHole(R[ui.round]);
 route();
 setInterval(()=>{if(ui.view==='dagskra'){const h=document.querySelector('.hero');if(h)h.outerHTML=heroHTML();}},60000);
