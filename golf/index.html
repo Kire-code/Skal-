@@ -224,7 +224,7 @@ details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 /* Útgáfunúmer: hækkað í hvert sinn sem ný útgáfa er sett inn, svo símar uppfæri sig sjálfir */
-const APP_VERSION='2026-11-v6';
+const APP_VERSION='2026-11-v7';
 /* ====== Supabase: Skal-verkefnið, taflan golf26 ====== */
 const SUPABASE_URL='https://xeqxwpprpcfjluudtsgo.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlcXh3cHBycGNmamx1dWR0c2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzIyMjEsImV4cCI6MjEwNjI0ODIyMX0.7eSJ0xfBQOqwqECAYK5pON9EkQ-YJE64BlHMwzxaplQ';
@@ -293,12 +293,20 @@ function rec(ph,si){if(ph<0)return 0;return Math.floor(ph/18)+((ph%18)>=si?1:0);
 function stb(g,par,r){return g==null?null:Math.max(0,par+r-g+2);}
 
 /* ---------- scoring ---------- */
+function cmpRank(a,b,higherBetter){
+  const d=higherBetter?b.v-a.v:a.v-b.v;if(d)return d;
+  const ta=a.tb||[],tb=b.tb||[];
+  for(let k=0;k<Math.max(ta.length,tb.length);k++){const x=(tb[k]||0)-(ta[k]||0);if(x)return higherBetter?x:-x;}
+  return 0;
+}
+function countback(pp){const sum=(a,b)=>pp.slice(a,b).reduce((s,v)=>s+(v||0),0);return [sum(9,18),sum(12,18),sum(15,18),pp[17]||0];}
 function rankAward(list,higherBetter){
   // list: [{id,v}] -> {id:points} using 4/3/2/1 split on ties
+  // Jafntefli er skorið úr með bráðabana (tb): seinni 9, síðustu 6, síðustu 3, síðasta hola
   const pts=[4,3,2,1];const out={};
-  const s=[...list].sort((a,b)=>higherBetter?b.v-a.v:a.v-b.v);
+  const s=[...list].sort((a,b)=>cmpRank(a,b,higherBetter));
   let i=0;
-  while(i<s.length){let j=i;while(j+1<s.length&&s[j+1].v===s[i].v)j++;
+  while(i<s.length){let j=i;while(j+1<s.length&&cmpRank(s[j+1],s[i],higherBetter)===0)j++;
     let sum=0;for(let k=i;k<=j;k++)sum+=pts[k]||0;const each=sum/(j-i+1);
     for(let k=i;k<=j;k++)out[s[k].id]=each;i=j+1;}
   return out;
@@ -313,9 +321,11 @@ function roundResult(r){
   const mult=r.double?2:1;
   if(r.fmt==='stableford'){
     res.unit='punktar';
-    ents.forEach(e=>{const cd=cards[e.id];let t=0,n=0,g=0;cd.strokes.forEach((s,h)=>{if(s!=null){t+=stb(s,c.par[h],rec(cd.ph,c.si[h]));n++;g+=s;}});res.rows.push({id:e.id,name:e.name,v:t,sub:n?`${n} holur, ${g} högg`:'ekki byrjaður'});});
+    ents.forEach(e=>{const cd=cards[e.id];let t=0,n=0,g=0;const pp=cd.strokes.map((s,h)=>s==null?0:stb(s,c.par[h],rec(cd.ph,c.si[h])));cd.strokes.forEach((s,h)=>{if(s!=null){t+=pp[h];n++;g+=s;}});res.rows.push({id:e.id,name:e.name,v:t,tb:countback(pp),sub:n?`${n} holur, ${g} högg`:'ekki byrjaður'});});
     if(anyEntered){const a=rankAward(res.rows,true);for(const k in a)res.awards[k]=a[k]*mult;}
-    res.rows.sort((a,b)=>b.v-a.v);
+    res.rows.sort((a,b)=>cmpRank(a,b,true));
+    // sýna hvar bráðabani réð úrslitum
+    for(let k=1;k<res.rows.length;k++){const A=res.rows[k-1],B=res.rows[k];if(A.v===B.v&&cmpRank(A,B,true)!==0){const lbl=['seinni 9','síðustu 6','síðustu 3','síðustu holu'];const i=A.tb.findIndex((x,q)=>x!==B.tb[q]);A.sub+=`. Vinnur bráðabana á ${lbl[i]} (${A.tb[i]} gegn ${B.tb[i]})`;}}
   }
   if(r.fmt==='fourball'){
     res.unit='punktar';
@@ -584,7 +594,7 @@ function renderStandings(){
   ROUNDS.forEach(r=>{const res=roundResult(r);html+=`<tr><td>${dayNum(r)}. ${COURSES[r.course]}<div class="muted small">${FORMATS[r.fmt].name}${r.double?', tvöföld':''}</div></td>${PLAYERS.map(p=>`<td>${res.awards[p.id]!=null?fmtNum(res.awards[p.id]):'–'}</td>`).join('')}</tr>`;});
   if(Object.keys(state.plays).length){html+=`<tr><td>Aukaleikir<div class="muted small">${Object.keys(state.games).length} leikir</div></td>${PLAYERS.map(p=>{const v=lb.find(x=>x.id===p.id).side||0;return `<td>${fmtNum(v)}</td>`;}).join('')}</tr>`;}
   html+=`</tbody></table></div>`;
-  html+=`<h2>Svona gefast stigin</h2><ul class="pts-list"><li>Einstaklingshringir og skins: 4 stig fyrir 1. sæti, 3 fyrir 2., 2 fyrir 3. og 1 fyrir 4. Jöfn sæti skipta stigunum á milli sín.</li><li>Liðahringir: 3 stig á hvorn í sigurliðinu, 1 á hvorn í hinu, 2 á alla ef jafnt.</li><li>Aukaverðlaun dagsins gefa 1 stig.</li><li>Lokahringurinn á Las Ramblas gefur tvöföld stig.</li><li>Stig úr aukaleikjum (Leikir-flipinn) bætast beint við.</li></ul>`;
+  html+=`<h2>Svona gefast stigin</h2><ul class="pts-list"><li>Einstaklingshringir og skins: 4 stig fyrir 1. sæti, 3 fyrir 2., 2 fyrir 3. og 1 fyrir 4. Jöfn sæti skipta stigunum á milli sín.</li><li>Liðahringir: 3 stig á hvorn í sigurliðinu, 1 á hvorn í hinu, 2 á alla ef jafnt.</li><li>Aukaverðlaun dagsins gefa 1 stig.</li><li>Lokahringurinn á Las Ramblas gefur tvöföld stig.</li><li>Ef tveir eru jafnir að punktum vinnur sá sem er með fleiri punkta á seinni 9, svo síðustu 6, síðustu 3 og loks síðustu holu.</li><li>Stig úr aukaleikjum (Leikir-flipinn) bætast beint við.</li></ul>`;
   app.innerHTML=html;
 }
 function renderInfo(){
