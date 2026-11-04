@@ -207,6 +207,9 @@ details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4
 .crank{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
 .crank .st{color:var(--flag)}
 #update-bar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--paper);border:0;border-radius:14px;padding:14px 16px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.gtoggle{display:flex;justify-content:center;margin:14px 0 4px}
+.gtoggle .seg button{padding:8px 14px}
+.gmode{display:inline-block;margin-left:8px;font-size:.8rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--flag);color:#1A1A1A;vertical-align:middle}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -224,7 +227,7 @@ details.hist summary{cursor:pointer;color:var(--muted);font-weight:600;padding:4
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 /* Útgáfunúmer: hækkað í hvert sinn sem ný útgáfa er sett inn, svo símar uppfæri sig sjálfir */
-const APP_VERSION='2026-11-v7';
+const APP_VERSION='2026-11-v8';
 /* ====== Supabase: Skal-verkefnið, taflan golf26 ====== */
 const SUPABASE_URL='https://xeqxwpprpcfjluudtsgo.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlcXh3cHBycGNmamx1dWR0c2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzIyMjEsImV4cCI6MjEwNjI0ODIyMX0.7eSJ0xfBQOqwqECAYK5pON9EkQ-YJE64BlHMwzxaplQ';
@@ -263,7 +266,8 @@ function madridDate(){try{return new Date().toLocaleDateString('sv-SE',{timeZone
 const state={cards:{},courses:{},extras:{},notes:[],games:{},plays:{},reviews:{}};
 let db=null, readOnly=false, dbFailed=false, writeError=false;
 const pending={};
-const ui={view:'dagskra',round:defaultRound(),hole:1,author:null,newGame:false,draft:null,rv:null};
+const ui={view:'dagskra',round:defaultRound(),hole:1,author:null,newGame:false,draft:null,rv:null,gross:false};
+try{ui.gross=localStorage.getItem('golf26-gross')==='1';}catch(e){}
 try{ui.author=localStorage.getItem('golf26-author');}catch(e){}
 
 function defaultRound(){
@@ -311,15 +315,24 @@ function rankAward(list,higherBetter){
     for(let k=i;k<=j;k++)out[s[k].id]=each;i=j+1;}
   return out;
 }
+const relStr=v=>v===0?'E':(v>0?'+'+v:String(v));
 function roundResult(r){
   const c=course(r.course), ents=entities(r);
   const res={rows:[],awards:{},started:false,complete:false,unit:''};
-  const cards=Object.fromEntries(ents.map(e=>[e.id,card(r,e)]));
+  const G=ui.gross;
+  const cards=Object.fromEntries(ents.map(e=>{const cd=card(r,e);if(G)cd.ph=0;return [e.id,cd];}));
   const anyEntered=ents.some(e=>cards[e.id].strokes.some(v=>v!=null));
   res.started=anyEntered;
   res.complete=ents.every(e=>cards[e.id].strokes.every(v=>v!=null));
   const mult=r.double?2:1;
-  if(r.fmt==='stableford'){
+  if(r.fmt==='stableford'&&G){
+    res.unit='högg';
+    ents.forEach(e=>{const cd=cards[e.id];let rel=0,n=0,g=0;cd.strokes.forEach((s,h)=>{if(s!=null){rel+=s-c.par[h];n++;g+=s;}});res.rows.push({id:e.id,name:e.name,v:rel,disp:n?relStr(rel):'–',n,sub:n?`${n} holur, ${g} högg`:'ekki byrjaður'});});
+    const played=res.rows.filter(x=>x.n);
+    if(anyEntered){const a=rankAward(played,false);for(const k in a)res.awards[k]=a[k]*mult;}
+    res.rows.sort((a,b)=>(b.n?1:0)-(a.n?1:0)||a.v-b.v);
+  }
+  else if(r.fmt==='stableford'){
     res.unit='punktar';
     ents.forEach(e=>{const cd=cards[e.id];let t=0,n=0,g=0;const pp=cd.strokes.map((s,h)=>s==null?0:stb(s,c.par[h],rec(cd.ph,c.si[h])));cd.strokes.forEach((s,h)=>{if(s!=null){t+=pp[h];n++;g+=s;}});res.rows.push({id:e.id,name:e.name,v:t,tb:countback(pp),sub:n?`${n} holur, ${g} högg`:'ekki byrjaður'});});
     if(anyEntered){const a=rankAward(res.rows,true);for(const k in a)res.awards[k]=a[k]*mult;}
@@ -327,14 +340,20 @@ function roundResult(r){
     // sýna hvar bráðabani réð úrslitum
     for(let k=1;k<res.rows.length;k++){const A=res.rows[k-1],B=res.rows[k];if(A.v===B.v&&cmpRank(A,B,true)!==0){const lbl=['seinni 9','síðustu 6','síðustu 3','síðustu holu'];const i=A.tb.findIndex((x,q)=>x!==B.tb[q]);A.sub+=`. Vinnur bráðabana á ${lbl[i]} (${A.tb[i]} gegn ${B.tb[i]})`;}}
   }
-  if(r.fmt==='fourball'){
+  if(r.fmt==='fourball'&&G){
+    res.unit='högg';
+    const teams=r.teams.map((t,i)=>{let rel=0,n=0;for(let h=0;h<18;h++){const vals=t.map(id=>cards[id].strokes[h]).filter(v=>v!=null);if(vals.length){rel+=Math.min(...vals)-c.par[h];n++;}}return {id:'t'+i,name:t.map(id=>P[id].name).join(' & '),v:rel,disp:n?relStr(rel):'–',n,sub:n?`${n} holur, betri bolti brúttó`:'ekki byrjaðir',members:t};});
+    res.rows=[...teams].sort((a,b)=>(b.n?1:0)-(a.n?1:0)||a.v-b.v);
+    if(anyEntered) teamAward(res,teams,false,mult);
+  }
+  else if(r.fmt==='fourball'){
     res.unit='punktar';
     const teams=r.teams.map((t,i)=>{let tot=0,n=0;for(let h=0;h<18;h++){const vals=t.map(id=>{const cd=cards[id];const s=cd.strokes[h];return s==null?null:stb(s,c.par[h],rec(cd.ph,c.si[h]));}).filter(v=>v!=null);if(vals.length){tot+=Math.max(...vals);n++;}}return {id:'t'+i,name:t.map(id=>P[id].name).join(' & '),v:tot,sub:n?`${n} holur`:'ekki byrjaðir',members:t};});
     res.rows=teams.sort((a,b)=>b.v-a.v);
     if(anyEntered) teamAward(res,teams,true,mult);
   }
   if(r.fmt==='scramble'){
-    res.unit='nettó';
+    res.unit=G?'brúttó':'nettó';
     const teams=ents.map(e=>{const cd=cards[e.id];let rel=0,n=0,g=0;cd.strokes.forEach((s,h)=>{if(s!=null){rel+=s-rec(cd.ph,c.si[h])-c.par[h];n++;g+=s;}});return {id:e.id,name:e.name,v:rel,disp:n?(rel===0?'E':(rel>0?'+'+rel:String(rel))):'–',sub:n?`${n} holur, ${g} högg brúttó`:'ekki byrjaðir',members:e.members,n};});
     res.rows=[...teams].sort((a,b)=>(b.n?1:0)-(a.n?1:0)||a.v-b.v);
     if(anyEntered) teamAward(res,teams,false,mult);
@@ -546,7 +565,8 @@ function renderScore(){
   html+=`</tbody></table></div>`;
 
   // result
-  html+=`<section class="result"><h3>${res.complete?'Úrslit':'Staðan í hringnum'}</h3>`;
+  html+=grossToggle();
+  html+=`<section class="result"><h3>${res.complete?'Úrslit':'Staðan í hringnum'}${ui.gross?'<span class="gmode">án forgjafar</span>':''}</h3>`;
   res.rows.forEach((row,i)=>{
     const aw=r.fmt==='fourball'||r.fmt==='scramble'?row.aw:res.awards[row.id];
     const val=row.disp!=null?row.disp:row.v;
@@ -586,7 +606,7 @@ function leaderboard(){
 function renderStandings(){
   const lb=leaderboard();
   const max=Math.max(1,...lb.map(x=>x.total));
-  let html=`<h2 style="margin-top:26px">Bikarinn</h2><p class="muted small" style="margin:-4px 0 6px">Stig safnast í hverjum hring. Sá sem er efstur eftir Las Ramblas tekur bikarinn heim.</p><div class="lb">`;
+  let html=grossToggle()+`<h2 style="margin-top:18px">Bikarinn${ui.gross?'<span class="gmode">án forgjafar</span>':''}</h2><p class="muted small" style="margin:-4px 0 6px">Stig safnast í hverjum hring. Sá sem er efstur eftir Las Ramblas tekur bikarinn heim.</p><div class="lb">`;
   let lastV=null,lastRank=0;
   lb.forEach((x,i)=>{const rank=x.total===lastV?lastRank:i+1;lastV=x.total;lastRank=rank;
     html+=`<div class="lbrow"><div class="rank">${rank}</div><div><div class="who">${esc(x.name)}</div><div class="bars" aria-hidden="true">${ROUNDS.map(r=>`<i class="${x.per[r.id]!=null?'f':''}" title="${COURSES[r.course]}"></i>`).join('')}</div></div><div class="tot">${fmtNum(x.total)}</div></div>`;});
@@ -710,11 +730,13 @@ function renderGames(){
   });
 }
 
+function grossToggle(){return `<div class="gtoggle"><div class="seg" role="group" aria-label="Staða með eða án forgjafar"><button data-gross="0" aria-pressed="${!ui.gross}">Með forgjöf</button><button data-gross="1" aria-pressed="${ui.gross}">Án forgjafar</button></div></div>`;}
 function render(){
   const focusId=document.activeElement&&document.activeElement.id;
   const typing=(focusId==='nt'||focusId==='gname'||focusId==='rv')?document.activeElement.value:null;
   ({dagskra:renderSchedule,skor:renderScore,leikir:renderGames,stada:renderStandings,upplysingar:renderInfo}[ui.view]||renderSchedule)();
   document.querySelectorAll('nav.tabs a').forEach(a=>a.setAttribute('aria-current',a.dataset.v===ui.view?'page':'false'));
+  app.querySelectorAll('[data-gross]').forEach(b=>b.onclick=()=>{ui.gross=b.dataset.gross==='1';try{localStorage.setItem('golf26-gross',ui.gross?'1':'0');}catch(e){}render();});
   if(typing!=null){const t=document.getElementById(focusId);if(t){t.value=typing;t.focus();}}
 }
 function route(){const h=location.hash.replace('#','');ui.view=['dagskra','skor','leikir','stada','upplysingar'].includes(h)?h:'dagskra';if(ui.view==='skor'&&!ui.hole)ui.hole=1;render();window.scrollTo(0,0);}
